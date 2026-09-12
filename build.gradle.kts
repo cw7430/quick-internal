@@ -26,8 +26,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-jooq")
 	implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:2.0.1")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2")
+
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("tools.jackson.module:jackson-module-kotlin")
+	implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
 	runtimeOnly("com.mysql:mysql-connector-j")
 	implementation("org.flywaydb:flyway-mysql:13.5.0")
