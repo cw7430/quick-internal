@@ -13,18 +13,19 @@ spring:
     baseline-version: 0
     locations:
       - classpath:db/migration/common
+      - classpath:db/migration/dev
 
-  jwt:
-    access:
-      secret: ${JWT_ACCESS_SECRET}
-      expiration: 30m
-    refresh:
-      secret: ${JWT_REFRESH_SECRET}
-      expiration: 14d
+jwt:
+  access:
+    secret: ${JWT_ACCESS_SECRET}
+    expiration: 30m
+  refresh:
+    secret: ${JWT_REFRESH_SECRET}
+    expiration: 14d
 
-  security:
-    api-key: ${API_KEY}
+security:
+  api-key: ${API_KEY}
 
-  logging:
-    level:
-      p6spy: INFO
+logging:
+  level:
+    p6spy: INFO
