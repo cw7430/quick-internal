@@ -6,22 +6,25 @@ sealed class ErrorResponseDto {
     abstract val code: String
     abstract val message: String
 
-    data class Simple(
+    private data class Simple(
         override val code: String,
         override val message: String
     ) : ErrorResponseDto()
 
-    data class WithErrors<T>(
+    private data class WithErrors<T>(
         override val code: String,
         override val message: String,
         val errors: T
     ) : ErrorResponseDto()
 
     companion object {
-        fun from(responseCode: ResponseCode) =
+        fun from(responseCode: ResponseCode): ErrorResponseDto =
             Simple(responseCode.code, responseCode.message)
 
-        fun <T> of(responseCode: ResponseCode, errors: T) =
+        fun <T> of(
+            responseCode: ResponseCode,
+            errors: T
+        ): ErrorResponseDto =
             WithErrors(responseCode.code, responseCode.message, errors)
     }
 }
