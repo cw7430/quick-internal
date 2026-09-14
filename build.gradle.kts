@@ -1,3 +1,5 @@
+import org.jooq.meta.kotlin.forcedType
+
 plugins {
 	kotlin("jvm") version "2.2.21"
 	kotlin("plugin.spring") version "2.2.21"
@@ -98,7 +100,7 @@ jooq {
 
 			generateSchemaSourceOnCompilation.set(false)
 
-			jooqConfiguration.apply {
+			jooqConfiguration {
 				jdbc.apply {
 					driver = "com.mysql.cj.jdbc.Driver"
 					url = dbUrl
@@ -114,6 +116,12 @@ jooq {
 						inputSchema = "quick-chat"
 						includes = ".*"
 						excludes = "flyway_schema_history"
+						forcedTypes.apply {
+							forcedType {
+								userType = "java.time.Instant"
+								includeTypes = "(?i:TIMESTAMP)"
+							}
+						}
 					}
 
 					target.apply {

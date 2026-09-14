@@ -43,10 +43,10 @@ class WebSecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(
-                    "/swagger-ui/**", "/api-docs/**", "/api/v1/health-check"
+                    "/swagger-ui/**", "/api-docs/**", "/api/v1/health-check", "/api/v1/user/login/**"
                 ).permitAll()
                     .requestMatchers(
-                        "/api/v1/user"
+                        "/api/v1/chat/**"
                     )
                     .hasAnyRole("USER", "ADMIN")
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
