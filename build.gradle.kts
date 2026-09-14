@@ -3,6 +3,7 @@ plugins {
 	kotlin("plugin.spring") version "2.2.21"
 	id("org.springframework.boot") version "4.0.8"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("nu.studer.jooq") version "10.2.1"
 }
 
 group = "com.quick"
@@ -31,7 +32,10 @@ dependencies {
 	implementation("tools.jackson.module:jackson-module-kotlin")
 	implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
+	@Suppress("AvoidDuplicateDependencies")
 	runtimeOnly("com.mysql:mysql-connector-j")
+	@Suppress("AvoidDuplicateDependencies")
+	jooqGenerator("com.mysql:mysql-connector-j")
 	implementation("org.flywaydb:flyway-mysql:13.5.0")
 
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
@@ -50,6 +54,88 @@ dependencies {
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+	}
+}
+
+fun loadDatabaseConfig(): Triple<String, String, String> {
+	val envFile = file(".env")
+
+	var url = ""
+	var user = ""
+	var password = ""
+
+	if (envFile.exists()) {
+		envFile.useLines { lines ->
+			lines.map { it.trim() }
+				.filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
+				.forEach { line ->
+					val parts = line.split("=", limit = 2)
+					val key = parts[0].trim()
+					val value = parts[1].trim().removeSurrounding("\"").removeSurrounding("'")
+
+					when (key) {
+						"DB_URL" -> url = value
+						"DB_USERNAME" -> user = value
+						"DB_PASSWORD" -> password = value
+					}
+				}
+		}
+	}
+
+	url = System.getenv("DB_URL") ?: url
+	user = System.getenv("DB_USERNAME") ?: user
+	password = System.getenv("DB_PASSWORD") ?: password
+
+	return Triple(url, user, password)
+}
+
+val (dbUrl, dbUser, dbPassword) = loadDatabaseConfig()
+
+jooq {
+	configurations {
+		create("main") {
+			version.set("3.19.37")
+
+			generateSchemaSourceOnCompilation.set(false)
+
+			jooqConfiguration.apply {
+				jdbc.apply {
+					driver = "com.mysql.cj.jdbc.Driver"
+					url = dbUrl
+					user = dbUser
+					password = dbPassword
+				}
+
+				generator.apply {
+					name = "org.jooq.codegen.KotlinGenerator"
+
+					database.apply {
+						name = "org.jooq.meta.mysql.MySQLDatabase"
+						inputSchema = "quick-chat"
+						includes = ".*"
+						excludes = "flyway_schema_history"
+					}
+
+					target.apply {
+						packageName = "com.example.jooq"
+						directory = "build/generated-src/jooq/main"
+					}
+
+					generate.apply {
+						isDeprecated = false
+						isRecords = true
+						isImmutablePojos = true
+						isFluentSetters = true
+					}
+				}
+			}
+		}
+	}
+}
+
+sourceSets {
+	main {
+		kotlin.srcDir("build/generated-src/jooq/main")
 	}
 }
 
