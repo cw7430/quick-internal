@@ -58,7 +58,7 @@ class ApiKeyAuthenticationFilter(
 
     companion object {
         private val EXCLUDED_URIS = listOf(
-            "/api/v1/auth/logout",
+            "/api/v1/health-check",
             "/swagger-ui/**",
             "/api-docs/**"
         )
