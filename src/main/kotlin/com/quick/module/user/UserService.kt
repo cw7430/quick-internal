@@ -6,12 +6,15 @@ import com.quick.common.config.security.JwtProvider
 import com.quick.common.config.security.JwtUtil
 import com.quick.module.user.dto.request.LogoutRequestDto
 import com.quick.module.user.dto.request.NativeLoginRequestDto
+import com.quick.module.user.dto.request.RefreshRequestDto
 import com.quick.module.user.dto.response.LoginResponseDto
 import com.quick.module.user.dto.vo.UserVo
 import com.quick.module.user.repository.UserJooqRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 private val log = KotlinLogging.logger {}
@@ -52,6 +55,7 @@ class UserService(
         )
     }
 
+    @Transactional
     fun nativeLogin(reqDto: NativeLoginRequestDto): LoginResponseDto {
         val user = userRepository.findLoginInfoByEmail(reqDto.email)
             ?: throw CustomException(ResponseCode.LOGIN_ERROR)
@@ -61,6 +65,22 @@ class UserService(
         }
 
         log.info { "Login In successfully for user ID:${user.userId}" }
+
+        return issueTokensAndBuild(user, reqDto.isAuto)
+    }
+
+    fun refresh(req: HttpServletRequest, reqDto: RefreshRequestDto): LoginResponseDto {
+        val refreshToken = jwtUtil.extractToken(req)
+        val userId = jwtUtil.extractUserIdFromRefreshToken(refreshToken)
+
+        if (!userRepository.existRefreshTokenByUserIdAndToken(userId, refreshToken)) {
+            throw CustomException(ResponseCode.UNAUTHORIZED)
+        }
+
+        val user = userRepository.findRefreshInfoByUserId(userId)
+            ?: throw CustomException(ResponseCode.UNAUTHORIZED)
+
+        log.info { "Refresh successfully for user ID:${user.userId}" }
 
         return issueTokensAndBuild(user, reqDto.isAuto)
     }

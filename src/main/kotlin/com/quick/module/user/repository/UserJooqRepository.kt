@@ -31,6 +31,30 @@ class UserJooqRepository(
             .and(USERS.ROLE.ne(Role.LEFT.value))
             .fetchOneInto(UserVo.NativeLogin::class.java)
 
+    fun findRefreshInfoByUserId(userId: Long): UserVo.Public? =
+        dslContext
+            .select(
+                USERS.ID.`as`("userId"),
+                USERS.AUTH_TYPE,
+                USERS.NICK_NAME,
+                USERS.GENDER,
+                USERS.ROLE,
+                USERS.CREATED_AT,
+                USERS.UPDATED_AT
+            )
+            .from(USERS)
+            .where(USERS.ID.eq(userId))
+            .and(USERS.ROLE.ne(Role.LEFT.value))
+            .fetchOneInto(UserVo.Public::class.java)
+
+    fun existRefreshTokenByUserIdAndToken(userId: Long, refreshToken: String): Boolean =
+        dslContext
+            .fetchExists(
+                dslContext.selectFrom(REFRESH_TOKEN)
+                    .where(REFRESH_TOKEN.USER_ID.eq(userId))
+                    .and(REFRESH_TOKEN.TOKEN.eq(refreshToken))
+            )
+
     fun createRefreshToken(userId: Long, refreshToken: String, expiresAt: Instant) =
         dslContext.insertInto(REFRESH_TOKEN)
             .set(REFRESH_TOKEN.USER_ID, userId)
