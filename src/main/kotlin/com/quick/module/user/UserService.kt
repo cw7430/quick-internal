@@ -4,6 +4,7 @@ import com.quick.common.api.exception.CustomException
 import com.quick.common.api.type.ResponseCode
 import com.quick.common.config.security.JwtProvider
 import com.quick.common.config.security.JwtUtil
+import com.quick.module.user.dto.request.LogoutRequestDto
 import com.quick.module.user.dto.request.NativeLoginRequestDto
 import com.quick.module.user.dto.response.LoginResponseDto
 import com.quick.module.user.dto.vo.UserVo
@@ -59,8 +60,13 @@ class UserService(
             throw CustomException(ResponseCode.LOGIN_ERROR)
         }
 
-        log.info { "Login In successfully for account ID:${user.userId}" }
+        log.info { "Login In successfully for user ID:${user.userId}" }
 
         return issueTokensAndBuild(user, reqDto.isAuto)
+    }
+
+    fun logout(reqDto: LogoutRequestDto) {
+        val refreshToken = reqDto.refreshToken ?: return
+        userRepository.deleteRefreshTokenByRefreshToken(refreshToken)
     }
 }

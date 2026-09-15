@@ -43,7 +43,8 @@ class WebSecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(
-                    "/swagger-ui/**", "/api-docs/**", "/api/v1/health-check", "/api/v1/user/login/**"
+                    "/swagger-ui/**", "/api-docs/**", "/api/v1/health-check", "/api/v1/user/login/**",
+                    "/api/v1/user/logout/**"
                 ).permitAll()
                     .requestMatchers(
                         "/api/v1/chat/**"

@@ -1,6 +1,6 @@
 package com.quick.common.config.security.type
 
-enum class Role(
+enum class FilterRole(
     val code: String,
     val authority: String
 ) {
@@ -9,13 +9,13 @@ enum class Role(
     GUEST("GUEST", "ROLE_GUEST");
 
     companion object {
-        fun from(code: String): Role {
+        fun from(code: String): FilterRole {
             if (code.isBlank()) {
                 return GUEST
             }
 
             return try {
-                Role.valueOf(code.uppercase())
+                FilterRole.valueOf(code.uppercase())
             } catch (e: IllegalArgumentException) {
                 e.stackTrace
                 GUEST

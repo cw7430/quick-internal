@@ -37,4 +37,9 @@ class UserJooqRepository(
             .set(REFRESH_TOKEN.TOKEN, refreshToken)
             .set(REFRESH_TOKEN.EXPIRES_AT, expiresAt)
             .execute()
+
+    fun deleteRefreshTokenByRefreshToken(refreshToken: String) =
+        dslContext.deleteFrom(REFRESH_TOKEN)
+            .where(REFRESH_TOKEN.TOKEN.eq(refreshToken))
+            .execute()
 }

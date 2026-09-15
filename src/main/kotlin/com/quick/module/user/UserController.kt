@@ -1,6 +1,7 @@
 package com.quick.module.user
 
 import com.quick.common.api.doc.ErrorResponseDoc
+import com.quick.module.user.dto.request.LogoutRequestDto
 import com.quick.module.user.dto.request.NativeLoginRequestDto
 import com.quick.module.user.dto.response.LoginResponseDto
 import io.swagger.v3.oas.annotations.Operation
@@ -69,4 +70,25 @@ class UserController(
     )
     fun nativeLogin(@RequestBody @Valid reqDto: NativeLoginRequestDto): ResponseEntity<LoginResponseDto> =
         ResponseEntity.ok(userService.nativeLogin(reqDto))
+
+
+    @PostMapping("/logout")
+    @Operation(summary = "로그아웃")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "로그아웃 성공"
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun logout(@RequestBody reqDto: LogoutRequestDto): ResponseEntity<Void> {
+        userService.logout(reqDto)
+        return ResponseEntity.noContent().build()
+    }
 }
