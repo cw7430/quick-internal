@@ -1,7 +1,7 @@
 package com.quick.common.config.security
 
 import com.quick.common.api.exception.CustomException
-import com.quick.common.config.security.type.Role
+import com.quick.common.config.security.type.FilterRole
 import io.jsonwebtoken.Claims
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
@@ -50,7 +50,7 @@ class JwtAuthenticationFilter(private val jwtProvider: JwtProvider, private val 
     fun setAuthentication(claims: Claims) {
         val id = claims.subject
         val roleCode = claims.get("role", String::class.java)
-        val role = Role.from(roleCode)
+        val role = FilterRole.from(roleCode)
         val authorities = listOf(SimpleGrantedAuthority(role.authority))
         val authentication =
             UsernamePasswordAuthenticationToken(id, null, authorities)

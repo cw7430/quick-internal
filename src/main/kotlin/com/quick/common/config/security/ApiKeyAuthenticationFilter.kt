@@ -60,7 +60,8 @@ class ApiKeyAuthenticationFilter(
         private val EXCLUDED_URIS = listOf(
             "/api/v1/health-check",
             "/swagger-ui/**",
-            "/api-docs/**"
+            "/api-docs/**",
+            "/api/v1/user/logout"
         )
     }
 }

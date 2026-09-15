@@ -3,7 +3,7 @@ package com.quick.module.user.dto.request
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 
-@Schema(name = "LoginRequest")
+@Schema(name = "NativeLoginRequest")
 data class NativeLoginRequestDto(
     @get:Schema(description = "이메일", example = "example@example.com")
     @field:NotBlank(message = "이메일을 입력해주세요.")
