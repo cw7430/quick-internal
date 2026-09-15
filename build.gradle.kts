@@ -6,6 +6,14 @@ plugins {
     id("org.springframework.boot") version "4.0.8"
     id("io.spring.dependency-management") version "1.1.7"
     id("nu.studer.jooq") version "10.2.1"
+    id("org.flywaydb.flyway") version "13.5.0"
+}
+
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-mysql:13.5.0")
+        classpath("com.mysql:mysql-connector-j:9.7.0")
+    }
 }
 
 group = "com.quick"
@@ -63,8 +71,33 @@ data class DatabaseConfig(
     val url: String,
     val user: String,
     val password: String,
-    val schema: String
-)
+    val schema: String,
+    val flywayLocations: Array<String>
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DatabaseConfig
+
+        if (url != other.url) return false
+        if (user != other.user) return false
+        if (password != other.password) return false
+        if (schema != other.schema) return false
+        if (!flywayLocations.contentEquals(other.flywayLocations)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = url.hashCode()
+        result = 31 * result + user.hashCode()
+        result = 31 * result + password.hashCode()
+        result = 31 * result + schema.hashCode()
+        result = 31 * result + flywayLocations.contentHashCode()
+        return result
+    }
+}
 
 fun loadDatabaseConfig(): DatabaseConfig {
     val activeProfile = System.getenv("SPRING_PROFILES_ACTIVE")
@@ -79,6 +112,19 @@ fun loadDatabaseConfig(): DatabaseConfig {
     val schema = when (activeProfile) {
         "test" -> "quick-chat-test"
         else -> "quick-chat"
+    }
+
+    val flywayLocations = when (activeProfile) {
+        "prod" ->  arrayOf(
+            "filesystem:src/main/resources/db/migration/common"
+        )
+        "stage" ->  arrayOf(
+            "filesystem:src/main/resources/db/migration/common"
+        )
+        else ->  arrayOf(
+            "filesystem:src/main/resources/db/migration/common",
+            "filesystem:src/main/resources/db/migration/dev"
+        )
     }
 
     var url = ""
@@ -107,10 +153,10 @@ fun loadDatabaseConfig(): DatabaseConfig {
     user = System.getenv("DB_USERNAME") ?: user
     password = System.getenv("DB_PASSWORD") ?: password
 
-    return DatabaseConfig(url, user, password, schema)
+    return DatabaseConfig(url, user, password, schema, flywayLocations)
 }
 
-val (dbUrl, dbUser, dbPassword, schema) = loadDatabaseConfig()
+val (dbUrl, dbUser, dbPassword, schema, flywayLocations) = loadDatabaseConfig()
 
 jooq {
     configurations {
@@ -144,7 +190,7 @@ jooq {
                     }
 
                     target.apply {
-                        packageName = "com.example.jooq"
+                        packageName = "com.quick.jooq"
                         directory = "build/generated-src/jooq/main"
                     }
 
@@ -158,6 +204,14 @@ jooq {
             }
         }
     }
+}
+
+flyway {
+    url = dbUrl
+    user = dbUser
+    password = dbPassword
+
+    locations = flywayLocations
 }
 
 sourceSets {

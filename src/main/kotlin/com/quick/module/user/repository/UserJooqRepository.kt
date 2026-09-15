@@ -1,8 +1,8 @@
 package com.quick.module.user.repository
 
-import com.example.jooq.tables.references.NATIVE_USERS
-import com.example.jooq.tables.references.REFRESH_TOKEN
-import com.example.jooq.tables.references.USERS
+import com.quick.jooq.tables.references.NATIVE_USERS
+import com.quick.jooq.tables.references.REFRESH_TOKEN
+import com.quick.jooq.tables.references.USERS
 import com.quick.module.user.dto.vo.UserVo
 import com.quick.module.user.type.Role
 import org.jooq.DSLContext
