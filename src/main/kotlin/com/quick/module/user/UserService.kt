@@ -69,6 +69,7 @@ class UserService(
         return issueTokensAndBuild(user, reqDto.isAuto)
     }
 
+    @Transactional
     fun refresh(req: HttpServletRequest, reqDto: RefreshRequestDto): LoginResponseDto {
         val refreshToken = jwtUtil.extractToken(req)
         val userId = jwtUtil.extractUserIdFromRefreshToken(refreshToken)
@@ -76,6 +77,8 @@ class UserService(
         if (!userRepository.existRefreshTokenByUserIdAndToken(userId, refreshToken)) {
             throw CustomException(ResponseCode.UNAUTHORIZED)
         }
+
+        userRepository.deleteRefreshTokenByRefreshToken(refreshToken)
 
         val user = userRepository.findRefreshInfoByUserId(userId)
             ?: throw CustomException(ResponseCode.UNAUTHORIZED)
