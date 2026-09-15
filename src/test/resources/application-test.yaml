@@ -1,0 +1,32 @@
+spring:
+  config:
+    import: file:.env.test[.properties]
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    enabled: true
+    mixed: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations:
+      - classpath:db/migration/common
+      - classpath:db/migration/dev
+
+jwt:
+  access:
+    secret: ${JWT_ACCESS_SECRET}
+    expiration: 30m
+  refresh:
+    secret: ${JWT_REFRESH_SECRET}
+    expiration: 14d
+
+security:
+  api-key: ${API_KEY}
+
+logging:
+  level:
+    p6spy: INFO
