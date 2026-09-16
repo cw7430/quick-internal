@@ -48,7 +48,7 @@ jobs:
 
       - name: Migrate DB & Generate JOOQ
         run: |
-          ./gradlew flywayMigrate
+          ./gradlew flywayMigrate -Pprofile=test
           ./gradlew generateJooq -Pprofile=test
 
       - name: Integration Test And Build
