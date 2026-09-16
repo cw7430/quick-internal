@@ -103,6 +103,7 @@ fun loadDatabaseConfig(): DatabaseConfig {
     val activeProfile = System.getenv("SPRING_PROFILES_ACTIVE")
         ?: project.findProperty("profile")?.toString()
         ?: "dev"
+    println(activeProfile)
 
     val envFile = when (activeProfile) {
         "test" -> file(".env.test")

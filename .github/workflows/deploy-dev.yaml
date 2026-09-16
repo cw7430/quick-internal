@@ -1,0 +1,77 @@
+name: Deploy Dev Only CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  MYSQL_DATABASE: quick-chat
+  MYSQL_USER: test_user
+  MYSQL_PASSWORD: test1234
+
+jobs:
+  deploy:
+    name: Test & Build
+    runs-on: ubuntu-latest
+    environment: development
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: ${{env.MYSQL_DATABASE}}
+          MYSQL_USER: ${{env.MYSQL_USER}}
+          MYSQL_PASSWORD: ${{env.MYSQL_PASSWORD}}
+        ports:
+          - 3306:3306
+        options: ->
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup Java
+        uses: actions/setup-java@v5.7.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Migrate DB & Generate JOOQ
+        run: |
+          ./gradlew migrate
+          ./gradlew generateJooq -Pprofile=test
+
+      - name: Integration Test And Build
+        run: ./gradlew clean build
+
+      - name: Prepare Artifact
+        if: success()
+        run: |
+          mkdir -p artifact
+          cp build/libs/quick-1.0.0.jar artifact/app.jar
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: quick-dev
+          path: artifact/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: quick-test-report
+          path: build/reports/tests/test/
+          if-no-files-found: warn
+          retention-days: 7
