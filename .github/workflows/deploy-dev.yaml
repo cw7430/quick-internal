@@ -24,7 +24,7 @@ jobs:
           MYSQL_PASSWORD: ${{env.MYSQL_PASSWORD}}
         ports:
           - 3306:3306
-        options: ->
+        options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
           --health-timeout=5s
