@@ -46,10 +46,11 @@ jobs:
       - name: Grant execute permission for Gradle
         run: chmod +x gradlew
 
-      - name: Migrate DB & Generate JOOQ
-        run: |
-          ./gradlew flywayMigrate -Pprofile=test
-          ./gradlew generateJooq -Pprofile=test
+      - name: Migrate DB
+        run: ./gradlew flywayMigrate -Pprofile=test
+
+      - name: Generate JOOQ
+        run: ./gradlew generateJooq -Pprofile=test
 
       - name: Integration Test And Build
         run: ./gradlew build
