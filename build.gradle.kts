@@ -110,10 +110,7 @@ fun loadDatabaseConfig(): DatabaseConfig {
         else -> file(".env")
     }
 
-    val schema = when (activeProfile) {
-        "test" -> "quick-chat-test"
-        else -> "quick-chat"
-    }
+    val schema = "quick-chat"
 
     val flywayLocations = when (activeProfile) {
         "prod" ->  arrayOf(
