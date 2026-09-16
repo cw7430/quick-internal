@@ -19,6 +19,6 @@ VALUES (1, '관리자', 'M', 'ADMIN'),
 
 INSERT INTO native_users
 (id, email, password_hash)
-VALUES (1, 'admin', '$2b$10$sVXWhDmhKu5JpPOhuqhKQOuIl2NKNEv6T9jjMhTnZJSAgAapWDMiu'),
-       (2, 'email@email.com', '$2b$10$sVXWhDmhKu5JpPOhuqhKQOuIl2NKNEv6T9jjMhTnZJSAgAapWDMiu'),
-       (3, 'email2@email.com', '$2b$10$sVXWhDmhKu5JpPOhuqhKQOuIl2NKNEv6T9jjMhTnZJSAgAapWDMiu');
+VALUES (1, 'admin', '$2a$10$3I4CT9WUIy..IHBvJkbDT.IVaXSP7CjLfUgNB3EZtitup8BgSv6Y2'),
+       (2, 'email@email.com', '$2a$10$3I4CT9WUIy..IHBvJkbDT.IVaXSP7CjLfUgNB3EZtitup8BgSv6Y2'),
+       (3, 'email2@email.com', '$2a$10$3I4CT9WUIy..IHBvJkbDT.IVaXSP7CjLfUgNB3EZtitup8BgSv6Y2');

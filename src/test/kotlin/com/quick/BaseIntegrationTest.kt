@@ -7,6 +7,7 @@ import com.quick.user.AuthTestUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
+@Import(AuthTestUtil::class)
 abstract class BaseIntegrationTest {
     @Autowired
     protected lateinit var mockMvc: MockMvc

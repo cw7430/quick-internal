@@ -45,7 +45,7 @@ class UserControllerNativeLoginTest : UserControllerTest() {
     }
 
     companion object {
-        private const val URL = "$USER_URL/login"
+        private const val URL = "$USER_URL/login/native"
         private val INVALID_LOGIN_DATA = NativeLoginRequestDto(
             " ",
             " ",

@@ -8,13 +8,7 @@ spring:
     password: ${DB_PASSWORD}
 
   flyway:
-    enabled: true
-    mixed: true
-    baseline-on-migrate: true
-    baseline-version: 0
-    locations:
-      - classpath:db/migration/common
-      - classpath:db/migration/dev
+    enabled: false
 
 jwt:
   access:
