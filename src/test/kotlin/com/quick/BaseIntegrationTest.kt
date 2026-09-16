@@ -15,8 +15,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -78,12 +78,13 @@ abstract class BaseIntegrationTest {
     }
 
     companion object {
-        protected val BASE_URL = "/api/v1"
+        protected const val BASE_URL = "/api/v1"
+        @JvmStatic
         protected val MASTER_LOGIN_DATA = NativeLoginRequestDto(
             "admin",
             "0000",
             false
         )
-        protected val INVALID_TOKEN = "123dj3w989kp2ekohoiysofhawioerq87retreheiogujigbydfggauid"
+        protected const val INVALID_TOKEN = "123dj3w989kp2ekohoiysofhawioerq87retreheiogujigbydfggauid"
     }
 }
