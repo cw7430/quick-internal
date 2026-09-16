@@ -52,7 +52,7 @@ jobs:
           ./gradlew generateJooq -Pprofile=test
 
       - name: Integration Test And Build
-        run: ./gradlew clean build
+        run: ./gradlew build
 
       - name: Prepare Artifact
         if: success()
