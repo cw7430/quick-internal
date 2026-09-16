@@ -1,5 +1,5 @@
-CREATE DATABASE `quick-chat-test`;
+CREATE DATABASE `quick-chat`;
 CREATE USER 'test_user'@'localhost' IDENTIFIED BY 'test1234';
-USE `quick-chat-test`;
-GRANT ALL PRIVILEGES ON `quick-chat-test`.* TO 'test_user'@'localhost';
+USE `quick-chat`;
+GRANT ALL PRIVILEGES ON `quick-chat`.* TO 'test_user'@'localhost';
 FLUSH PRIVILEGES;
