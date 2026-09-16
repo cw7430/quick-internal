@@ -88,14 +88,6 @@ class UserController(
             ]
         ),
         ApiResponse(
-            responseCode = "400", description = "입력값 오류", content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.BadRequest::class)
-                )
-            ]
-        ),
-        ApiResponse(
             responseCode = "401", description = "인증오류", content = [
                 Content(
                     mediaType = "application/json",
