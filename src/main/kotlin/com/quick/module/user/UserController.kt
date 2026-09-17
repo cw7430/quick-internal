@@ -1,10 +1,7 @@
 package com.quick.module.user
 
 import com.quick.common.api.doc.ErrorResponseDoc
-import com.quick.module.user.dto.request.CreateNativeUserRequestDto
-import com.quick.module.user.dto.request.LogoutRequestDto
-import com.quick.module.user.dto.request.NativeLoginRequestDto
-import com.quick.module.user.dto.request.RefreshRequestDto
+import com.quick.module.user.dto.request.*
 import com.quick.module.user.dto.response.LoginResponseDto
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -16,10 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -232,4 +226,64 @@ class UserController(
     )
     fun createNativeUsers(@RequestBody @Valid reqDto: CreateNativeUserRequestDto.Create)
             : ResponseEntity<LoginResponseDto> = ResponseEntity.ok(userService.createNativeUsers(reqDto))
+
+
+    @PatchMapping("/password")
+    @Operation(summary = "비밀번호 변경")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "비밀번호 변경 성공"
+        ),
+        ApiResponse(
+            responseCode = "400", description = "입력값 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.BadRequest::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class,
+                            ErrorResponseDoc.PasswordError::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "409", description = "중복된 비밀번호", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.DuplicateResource::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun updatePassword(@RequestBody @Valid reqDto: UpdateNativeUserRequestDto.Password): ResponseEntity<Void> {
+        userService.updatePassword(reqDto)
+        return ResponseEntity.noContent().build()
+    }
 }

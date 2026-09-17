@@ -81,10 +81,18 @@ abstract class BaseIntegrationTest {
 
     companion object {
         protected const val BASE_URL = "/api/v1"
+
         @JvmStatic
         protected val MASTER_LOGIN_DATA = NativeLoginRequestDto(
             "admin",
             "0000",
+            false
+        )
+
+        @JvmStatic
+        protected val USER_LOGIN_DATA = NativeLoginRequestDto(
+            "email3@email.com",
+            "qwerasdf!@!@",
             false
         )
         protected const val INVALID_TOKEN = "123dj3w989kp2ekohoiysofhawioerq87retreheiogujigbydfggauid"

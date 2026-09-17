@@ -167,7 +167,7 @@ class UserService(
     @Transactional
     fun updateNickName(reqDto: UpdateNativeUserRequestDto.NickName) {
         val userId = jwtUtil.getCurrentUserId()
-        if (!userJooqRepository.existUsersByUserId(userId)) {
+        if (!userJooqRepository.existNativeUsersByUserId(userId)) {
             throw CustomException(ResponseCode.UNAUTHORIZED)
         }
         userJooqRepository.updateNickName(userId, reqDto.newNickName)
