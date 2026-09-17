@@ -1,6 +1,7 @@
 package com.quick.module.user
 
 import com.quick.common.api.doc.ErrorResponseDoc
+import com.quick.module.user.dto.request.CreateNativeUserRequestDto
 import com.quick.module.user.dto.request.LogoutRequestDto
 import com.quick.module.user.dto.request.NativeLoginRequestDto
 import com.quick.module.user.dto.request.RefreshRequestDto
@@ -138,6 +139,50 @@ class UserController(
     )
     fun logout(@RequestBody reqDto: LogoutRequestDto): ResponseEntity<Void> {
         userService.logout(reqDto)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/email")
+    @Operation(summary = "Email 중복 체크")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "Email 중복 체크 성공"
+        ),
+        ApiResponse(
+            responseCode = "400", description = "입력값 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.BadRequest::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "409", description = "중복된 Email", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.DuplicateResource::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun checkEmail(@RequestBody @Valid reqDto: CreateNativeUserRequestDto.CheckEmail): ResponseEntity<Void> {
+        userService.checkEmail(reqDto)
         return ResponseEntity.noContent().build()
     }
 }

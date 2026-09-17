@@ -36,7 +36,7 @@ class UserControllerNativeLoginTest : UserControllerTest() {
     }
 
     @Test
-    @DisplayName("로그인 - 잘못 된 API-KEY")
+    @DisplayName("로그인 - Api Key 오류")
     fun loginFailWithKeyError() {
         post(URL).body(MASTER_LOGIN_DATA).send()
             .andExpect(status().isForbidden())

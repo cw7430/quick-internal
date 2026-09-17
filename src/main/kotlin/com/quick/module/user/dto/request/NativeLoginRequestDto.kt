@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank
 
 @Schema(name = "NativeLoginRequest")
 data class NativeLoginRequestDto(
-    @get:Schema(description = "이메일", example = "example@example.com")
     @field:NotBlank(message = "이메일을 입력해주세요.")
+    @get:Schema(description = "이메일", example = "example@example.com")
     val email: String,
 
     @field:NotBlank(message = "비밀번호를 입력해주세요.")
