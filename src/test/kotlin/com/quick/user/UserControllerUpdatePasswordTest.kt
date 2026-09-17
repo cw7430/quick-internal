@@ -55,7 +55,7 @@ class UserControllerUpdatePasswordTest : UserControllerTest() {
     @DisplayName("비밀번호 변경 - 잘못 된 토큰")
     fun failWithInvalidToken() {
         patch(URL)
-            .key().auth(INVALID_TOKEN).body(WRONG_PASSWORD_DATA)
+            .key().auth(INVALID_TOKEN).body(DATA)
             .send().andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.code").value(ResponseCode.INVALID_TOKEN.code))
             .andExpect(jsonPath("$.message").isNotEmpty())
