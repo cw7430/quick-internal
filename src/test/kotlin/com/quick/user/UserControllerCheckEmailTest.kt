@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class UserControllerCheckEmail : UserControllerTest() {
+class UserControllerCheckEmailTest : UserControllerTest() {
 
     @Test
     @DisplayName("Email 중복 체크 - 성공")

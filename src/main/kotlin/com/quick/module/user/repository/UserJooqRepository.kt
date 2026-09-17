@@ -64,13 +64,10 @@ class UserJooqRepository(
                     .and(REFRESH_TOKEN.TOKEN.eq(refreshToken))
             )
 
-    fun existUsersByUserId(userId: Long): Boolean =
+    fun existNativeUsersByUserId(userId: Long): Boolean =
         dslContext.fetchExists(
-            dslContext.selectFrom(USERS)
-                .where(USERS.ID.eq(userId))
-                .and(
-                    USERS.ROLE.ne(Role.LEFT.value)
-                )
+            dslContext.selectFrom(NATIVE_USERS)
+                .where(NATIVE_USERS.ID.eq(userId))
         )
 
     fun existNativeUsersByEmail(email: String): Boolean =
