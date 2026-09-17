@@ -49,6 +49,13 @@ class UserJooqRepository(
             .and(USERS.ROLE.ne(Role.LEFT.value))
             .fetchOneInto(UserVo.Public::class.java)
 
+    fun findPasswordByUserId(userId: Long): String? =
+        dslContext
+            .select(NATIVE_USERS.PASSWORD_HASH)
+            .from(NATIVE_USERS)
+            .where(NATIVE_USERS.ID.eq(userId))
+            .fetchOneInto(String::class.java)
+
     fun existRefreshTokenByUserIdAndToken(userId: Long, refreshToken: String): Boolean =
         dslContext
             .fetchExists(
@@ -56,6 +63,15 @@ class UserJooqRepository(
                     .where(REFRESH_TOKEN.USER_ID.eq(userId))
                     .and(REFRESH_TOKEN.TOKEN.eq(refreshToken))
             )
+
+    fun existUsersByUserId(userId: Long): Boolean =
+        dslContext.fetchExists(
+            dslContext.selectFrom(USERS)
+                .where(USERS.ID.eq(userId))
+                .and(
+                    USERS.ROLE.ne(Role.LEFT.value)
+                )
+        )
 
     fun existNativeUsersByEmail(email: String): Boolean =
         dslContext.fetchExists(
@@ -86,6 +102,18 @@ class UserJooqRepository(
             .set(NATIVE_USERS.ID, id)
             .set(NATIVE_USERS.EMAIL, email)
             .set(NATIVE_USERS.PASSWORD_HASH, passwordHash)
+            .execute()
+
+    fun updatePassword(userId: Long, passwordHash: String) =
+        dslContext.update(NATIVE_USERS)
+            .set(NATIVE_USERS.PASSWORD_HASH, passwordHash)
+            .where(NATIVE_USERS.ID.eq(userId))
+            .execute()
+
+    fun updateNickName(userId: Long, nickName: String) =
+        dslContext.update(USERS)
+            .set(USERS.NICK_NAME, nickName)
+            .where(USERS.ID.eq(userId))
             .execute()
 
     fun deleteRefreshTokenByRefreshToken(refreshToken: String) =
