@@ -8,6 +8,7 @@ import com.quick.module.user.dto.request.CreateNativeUserRequestDto
 import com.quick.module.user.dto.request.LogoutRequestDto
 import com.quick.module.user.dto.request.NativeLoginRequestDto
 import com.quick.module.user.dto.request.RefreshRequestDto
+import com.quick.module.user.dto.request.UpdateNativeUserRequestDto
 import com.quick.module.user.dto.response.LoginResponseDto
 import com.quick.module.user.dto.vo.UserVo
 import com.quick.module.user.repository.UserJooqRepository
@@ -143,5 +144,33 @@ class UserService(
         log.info { "Register successfully for user ID:${userId}" }
 
         return issueTokensAndBuild(loginInfo, isAuto = false)
+    }
+
+    @Transactional
+    fun updatePassword(reqDto: UpdateNativeUserRequestDto.Password) {
+        val userId = jwtUtil.getCurrentUserId()
+        val formalPassword = userJooqRepository.findPasswordByUserId(userId)
+            ?: throw CustomException(ResponseCode.UNAUTHORIZED)
+        if (!passwordEncoder.matches(reqDto.password, formalPassword)) {
+            throw CustomException(ResponseCode.PASSWORD_ERROR)
+        }
+        if (passwordEncoder.matches(reqDto.newPassword, formalPassword)) {
+            throw CustomException(ResponseCode.DUPLICATE_RESOURCE)
+        }
+        userJooqRepository.updatePassword(
+            userId,
+            passwordEncoder.encode(reqDto.newPassword)!!
+        )
+        log.info { "Update Password successfully for user ID:${userId}" }
+    }
+
+    @Transactional
+    fun updateNickName(reqDto: UpdateNativeUserRequestDto.NickName) {
+        val userId = jwtUtil.getCurrentUserId()
+        if (!userJooqRepository.existUsersByUserId(userId)) {
+            throw CustomException(ResponseCode.UNAUTHORIZED)
+        }
+        userJooqRepository.updateNickName(userId, reqDto.newNickName)
+        log.info { "Update NickName successfully for user ID:${userId}" }
     }
 }
