@@ -11,7 +11,7 @@ class UserControllerCheckEmail : UserControllerTest() {
 
     @Test
     @DisplayName("Email 중복 체크 - 성공")
-    fun checkEmailSuccess() {
+    fun success() {
         post(URL)
             .key().body(DATA).send()
             .andExpect(status().isNoContent())
@@ -19,7 +19,7 @@ class UserControllerCheckEmail : UserControllerTest() {
 
     @Test
     @DisplayName("Email 중복 체크 - 잘 못된 입력 값")
-    fun checkEmailFailWithValidationError() {
+    fun failWithValidationError() {
         post(URL)
             .key().body(INVALIDATED_DATA).send()
             .andExpect(status().isBadRequest())
@@ -29,7 +29,7 @@ class UserControllerCheckEmail : UserControllerTest() {
 
     @Test
     @DisplayName("Email 중복 체크 - Api Key 오류")
-    fun checkEmailFailWithKeyError() {
+    fun failWithKeyError() {
         post(URL)
             .body(DATA).send().andExpect(status().isForbidden())
             .andExpect(jsonPath("$.code").value(ResponseCode.KEY_ERROR.code))
@@ -38,7 +38,7 @@ class UserControllerCheckEmail : UserControllerTest() {
 
     @Test
     @DisplayName("Email 중복 체크 - 중복 된 값")
-    fun checkEmailFailWithDuplicateResource() {
+    fun failWithDuplicateResource() {
         post(URL)
             .key().body(DUPLICATED_DATA).send()
             .andExpect(status().isConflict())

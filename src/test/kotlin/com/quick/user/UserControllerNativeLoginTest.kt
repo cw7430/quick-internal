@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 class UserControllerNativeLoginTest : UserControllerTest() {
     @Test
     @DisplayName("로그인 - 성공")
-    fun loginSuccess() {
+    fun success() {
         post(URL).key().body(MASTER_LOGIN_DATA).send()
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.accessToken").isNotEmpty())
@@ -19,7 +19,7 @@ class UserControllerNativeLoginTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그인 - 잘 못된 입력 값")
-    fun loginFailWithValidationError() {
+    fun failWithValidationError() {
         post(URL).key().body(INVALID_LOGIN_DATA).send()
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value(ResponseCode.VALIDATION_ERROR.code))
@@ -28,7 +28,7 @@ class UserControllerNativeLoginTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그인 - 잘못 된 아이디 또는 비밀번호")
-    fun loginFailWithLoginError() {
+    fun failWithLoginError() {
         post(URL).key().body(WRONG_LOGIN_DATA).send()
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.code").value(ResponseCode.LOGIN_ERROR.code))
@@ -37,7 +37,7 @@ class UserControllerNativeLoginTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그인 - Api Key 오류")
-    fun loginFailWithKeyError() {
+    fun failWithKeyError() {
         post(URL).body(MASTER_LOGIN_DATA).send()
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.code").value(ResponseCode.KEY_ERROR.code))

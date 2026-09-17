@@ -157,18 +157,18 @@ class UserController(
             ]
         ),
         ApiResponse(
-            responseCode = "409", description = "중복된 Email", content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.DuplicateResource::class)
-                )
-            ]
-        ),
-        ApiResponse(
             responseCode = "403", description = "Api Key 오류", content = [
                 Content(
                     mediaType = "application/json",
                     schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "409", description = "중복된 Email", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.DuplicateResource::class)
                 )
             ]
         ),
@@ -185,4 +185,51 @@ class UserController(
         userService.checkEmail(reqDto)
         return ResponseEntity.noContent().build()
     }
+
+    @PostMapping("/register")
+    @Operation(summary = "회원 가입")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "200", description = "회원 가입 성공", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = LoginResponseDto::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "400", description = "입력값 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.BadRequest::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "409", description = "중복된 Email", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.DuplicateResource::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun createNativeUsers(@RequestBody @Valid reqDto: CreateNativeUserRequestDto.Create)
+            : ResponseEntity<LoginResponseDto> = ResponseEntity.ok(userService.createNativeUsers(reqDto))
 }

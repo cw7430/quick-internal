@@ -70,13 +70,16 @@ class UserJooqRepository(
             .set(REFRESH_TOKEN.EXPIRES_AT, expiresAt)
             .execute()
 
-    fun createUsersAndGetId(authType: AuthType, nickName: String, gender: Gender): Long? =
-        dslContext.insertInto(USERS)
-            .set(USERS.AUTH_TYPE, authType.value)
-            .set(USERS.NICK_NAME, nickName)
-            .set(USERS.GENDER, gender.value)
-            .returning(USERS.ID)
-            .fetchOne(USERS.ID)
+    fun createUsersAndGetUsers(
+        authType: AuthType,
+        nickName: String,
+        gender: Gender
+    ) = dslContext.insertInto(USERS)
+        .set(USERS.AUTH_TYPE, authType.value)
+        .set(USERS.NICK_NAME, nickName)
+        .set(USERS.GENDER, gender.value)
+        .returning()
+        .fetchOne()
 
     fun createNativeUsers(id: Long, email: String, passwordHash: String) =
         dslContext.insertInto(NATIVE_USERS)

@@ -11,7 +11,7 @@ class UserControllerRefreshTest : UserControllerTest() {
 
     @Test
     @DisplayName("토큰 재발급 - 성공")
-    fun refreshSuccess() {
+    fun success() {
         val refreshToken = authTestUtil.getTestToken(MASTER_LOGIN_DATA).refreshToken
         post(URL)
             .key().auth(refreshToken).body(DATA)
@@ -22,7 +22,7 @@ class UserControllerRefreshTest : UserControllerTest() {
 
     @Test
     @DisplayName("토큰 재발급 - 인증 오류")
-    fun refreshFailWithUnauthorized() {
+    fun failWithUnauthorized() {
         post(URL).key().body(DATA)
             .send().andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.code").value(ResponseCode.UNAUTHORIZED.code))
@@ -31,7 +31,7 @@ class UserControllerRefreshTest : UserControllerTest() {
 
     @Test
     @DisplayName("토큰 재발급 - 잘못 된 토큰")
-    fun refreshFailWithInvalidToken() {
+    fun failWithInvalidToken() {
         post(URL).key()
             .auth(INVALID_TOKEN).body(DATA)
             .send().andExpect(status().isUnauthorized())
@@ -41,7 +41,7 @@ class UserControllerRefreshTest : UserControllerTest() {
 
     @Test
     @DisplayName("토큰 재발급 - 만료 된 토큰")
-    fun refreshFailWithExpiredToken() {
+    fun failWithExpiredToken() {
         val refreshToken = authTestUtil.generateExpiredRefreshToken(MASTER_LOGIN_DATA)
         post(URL).key().auth(refreshToken).body(DATA)
             .send().andExpect(status().isUnauthorized())
@@ -51,7 +51,7 @@ class UserControllerRefreshTest : UserControllerTest() {
 
     @Test
     @DisplayName("토큰 재발급 - Api Key 오류")
-    fun refreshFailWithKeyError() {
+    fun failWithKeyError() {
         val refreshToken = authTestUtil.getTestToken(MASTER_LOGIN_DATA).refreshToken
         post(URL)
             .auth(refreshToken).body(DATA)

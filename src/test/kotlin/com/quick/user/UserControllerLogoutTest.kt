@@ -9,7 +9,7 @@ class UserControllerLogoutTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그아웃 - 성공")
-    fun logoutSuccess() {
+    fun success() {
         val refreshToken = authTestUtil.getTestToken(MASTER_LOGIN_DATA).refreshToken
         val data = LogoutRequestDto(refreshToken)
         post(URL)
@@ -19,7 +19,7 @@ class UserControllerLogoutTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그아웃 - 잘못 된 토큰으로 성공")
-    fun logoutSuccessWithInvalidToken() {
+    fun successWithInvalidToken() {
         val data = LogoutRequestDto(INVALID_TOKEN)
         post(URL)
             .key().body(data).send()
@@ -28,7 +28,7 @@ class UserControllerLogoutTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그아웃 - 토큰 없이 성공")
-    fun logoutSuccessWithoutToken() {
+    fun successWithoutToken() {
         val data = LogoutRequestDto(null)
         post(URL)
             .key().body(data).send()
@@ -37,7 +37,7 @@ class UserControllerLogoutTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그아웃 - Api Key 없이 성공")
-    fun logoutSuccessWithoutKey() {
+    fun successWithoutKey() {
         val refreshToken = authTestUtil.getTestToken(MASTER_LOGIN_DATA).refreshToken
         val data = LogoutRequestDto(refreshToken)
         post(URL)
