@@ -92,7 +92,7 @@ abstract class BaseIntegrationTest {
         @JvmStatic
         protected val USER_LOGIN_DATA = NativeLoginRequestDto(
             "email3@email.com",
-            "qwerasdf!@!@",
+            "strongpassword123!@",
             false
         )
         protected const val INVALID_TOKEN = "123dj3w989kp2ekohoiysofhawioerq87retreheiogujigbydfggauid"

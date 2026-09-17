@@ -57,7 +57,7 @@ class UserControllerUpdatePasswordTest : UserControllerTest() {
         patch(URL)
             .key().auth(INVALID_TOKEN).body(WRONG_PASSWORD_DATA)
             .send().andExpect(status().isUnauthorized())
-            .andExpect(jsonPath("$.code").value(ResponseCode.PASSWORD_ERROR.code))
+            .andExpect(jsonPath("$.code").value(ResponseCode.INVALID_TOKEN.code))
             .andExpect(jsonPath("$.message").isNotEmpty())
     }
 
@@ -97,11 +97,11 @@ class UserControllerUpdatePasswordTest : UserControllerTest() {
     companion object {
         private const val URL = "$USER_URL/password"
         private val DATA = UpdateNativeUserRequestDto.Password(
-            password = "qwerasdf!@!@",
+            password = "strongpassword123!@",
             newPassword = "newexamplepw1234!@",
         )
         private val INVALIDATED_DATA = UpdateNativeUserRequestDto.Password(
-            password = "qwerasdf!@!@",
+            password = "strongpassword123!@",
             newPassword = "1234",
         )
         private val WRONG_PASSWORD_DATA = UpdateNativeUserRequestDto.Password(
@@ -109,8 +109,8 @@ class UserControllerUpdatePasswordTest : UserControllerTest() {
             newPassword = "newexamplepw1234!@",
         )
         private val DUPLICATED_DATA = UpdateNativeUserRequestDto.Password(
-            password = "qwerasdf!@!@",
-            newPassword = "qwerasdf!@!@"
+            password = "strongpassword123!@",
+            newPassword = "strongpassword123!@"
         )
     }
 }

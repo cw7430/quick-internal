@@ -30,4 +30,4 @@ INSERT INTO native_users
 VALUES (1, 'admin', '$2a$10$3I4CT9WUIy..IHBvJkbDT.IVaXSP7CjLfUgNB3EZtitup8BgSv6Y2'),
        (2, 'email@email.com', '$2a$10$3I4CT9WUIy..IHBvJkbDT.IVaXSP7CjLfUgNB3EZtitup8BgSv6Y2'),
        (3, 'email2@email.com', '$2a$10$3I4CT9WUIy..IHBvJkbDT.IVaXSP7CjLfUgNB3EZtitup8BgSv6Y2'),
-       (4, 'email3@email.com', '$2a$12$DetD6G5ghlXmwFzKHEYOPemI/YMCfo8UYfLc6YAwCt7YB3QS1YbW6');
+       (4, 'email3@email.com', '$2a$12$Jyz/IhFJrfOmvNdekDXALup3fvvqiYvle64CIBDVY560bFT1sBaDG');
