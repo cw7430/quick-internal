@@ -286,4 +286,54 @@ class UserController(
         userService.updatePassword(reqDto)
         return ResponseEntity.noContent().build()
     }
+
+    @PatchMapping("/nickname")
+    @Operation(summary = "닉네임 변경")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "닉네임 변경 성공"
+        ),
+        ApiResponse(
+            responseCode = "400", description = "입력값 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.BadRequest::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun updateNickName(@RequestBody @Valid reqDto: UpdateNativeUserRequestDto.NickName): ResponseEntity<Void> {
+        userService.updateNickName(reqDto)
+        return ResponseEntity.noContent().build()
+    }
 }
