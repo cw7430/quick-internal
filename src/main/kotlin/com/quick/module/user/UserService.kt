@@ -4,12 +4,16 @@ import com.quick.common.api.exception.CustomException
 import com.quick.common.api.type.ResponseCode
 import com.quick.common.config.security.JwtProvider
 import com.quick.common.config.security.JwtUtil
+import com.quick.module.user.dto.request.CreateNativeUserRequestDto
 import com.quick.module.user.dto.request.LogoutRequestDto
 import com.quick.module.user.dto.request.NativeLoginRequestDto
 import com.quick.module.user.dto.request.RefreshRequestDto
 import com.quick.module.user.dto.response.LoginResponseDto
 import com.quick.module.user.dto.vo.UserVo
 import com.quick.module.user.repository.UserJooqRepository
+import com.quick.module.user.type.AuthType
+import com.quick.module.user.type.Gender
+import com.quick.module.user.type.Role
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -24,7 +28,7 @@ class UserService(
     private val jwtProvider: JwtProvider,
     private val jwtUtil: JwtUtil,
     private val passwordEncoder: PasswordEncoder,
-    private val userRepository: UserJooqRepository
+    private val userJooqRepository: UserJooqRepository
 ) {
     private fun issueTokensAndBuild(user: UserVo, isAuto: Boolean): LoginResponseDto {
         val accessClaims = jwtProvider.generateAccessToken(
@@ -36,7 +40,7 @@ class UserService(
         val refreshTokenExpiresAtMs = refreshClaims.expiresAtMs
         val refreshTokenExpiresAtDate = Instant.ofEpochMilli(refreshTokenExpiresAtMs)
 
-        userRepository.createRefreshToken(
+        userJooqRepository.createRefreshToken(
             user.userId,
             refreshClaims.token,
             refreshTokenExpiresAtDate
@@ -57,7 +61,7 @@ class UserService(
 
     @Transactional
     fun nativeLogin(reqDto: NativeLoginRequestDto): LoginResponseDto {
-        val user = userRepository.findLoginInfoByEmail(reqDto.email)
+        val user = userJooqRepository.findLoginInfoByEmail(reqDto.email)
             ?: throw CustomException(ResponseCode.LOGIN_ERROR)
 
         if (!passwordEncoder.matches(reqDto.password, user.passwordHash)) {
@@ -74,13 +78,13 @@ class UserService(
         val refreshToken = jwtUtil.extractToken(req)
         val userId = jwtUtil.extractUserIdFromRefreshToken(refreshToken)
 
-        if (!userRepository.existRefreshTokenByUserIdAndToken(userId, refreshToken)) {
+        if (!userJooqRepository.existRefreshTokenByUserIdAndToken(userId, refreshToken)) {
             throw CustomException(ResponseCode.UNAUTHORIZED)
         }
 
-        userRepository.deleteRefreshTokenByRefreshToken(refreshToken)
+        userJooqRepository.deleteRefreshTokenByRefreshToken(refreshToken)
 
-        val user = userRepository.findRefreshInfoByUserId(userId)
+        val user = userJooqRepository.findRefreshInfoByUserId(userId)
             ?: throw CustomException(ResponseCode.UNAUTHORIZED)
 
         log.info { "Refresh successfully for user ID:${user.userId}" }
@@ -88,8 +92,56 @@ class UserService(
         return issueTokensAndBuild(user, reqDto.isAuto)
     }
 
+    @Transactional
     fun logout(reqDto: LogoutRequestDto) {
         val refreshToken = reqDto.refreshToken ?: return
-        userRepository.deleteRefreshTokenByRefreshToken(refreshToken)
+        userJooqRepository.deleteRefreshTokenByRefreshToken(refreshToken)
+    }
+
+    @Transactional
+    fun checkEmail(reqDto: CreateNativeUserRequestDto) {
+        if (userJooqRepository.existNativeUsersByEmail(reqDto.email)) {
+            throw CustomException(ResponseCode.DUPLICATE_RESOURCE)
+        }
+
+        log.info { "Check Email successfully for Email:${reqDto.email}" }
+    }
+
+    @Transactional
+    fun createNativeUsers(reqDto: CreateNativeUserRequestDto.Create): LoginResponseDto {
+        checkEmail(reqDto)
+        val users = userJooqRepository.createUsersAndGetUsers(
+            authType = AuthType.NATIVE,
+            nickName = reqDto.nickName,
+            gender = reqDto.gender
+        ) ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR)
+
+        val userId = users.id ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR)
+
+        userJooqRepository.createNativeUsers(
+            id = userId,
+            email = reqDto.email,
+            passwordHash = passwordEncoder.encode(reqDto.password)!!
+        )
+
+        val loginInfo = UserVo.Public(
+            userId,
+            authType = AuthType.from(users.authType)
+                ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+            nickName = users.nickName
+                ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+            gender = Gender.from(users.gender)
+                ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+            role = Role.from(users.role)
+                ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+            createdAt = users.createdAt
+                ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+            updatedAt = users.updatedAt
+                ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR)
+        )
+
+        log.info { "Register successfully for user ID:${userId}" }
+
+        return issueTokensAndBuild(loginInfo, isAuto = false)
     }
 }

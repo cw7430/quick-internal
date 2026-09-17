@@ -44,7 +44,8 @@ class WebSecurityConfig(
             .authorizeHttpRequests {
                 it.requestMatchers(
                     "/swagger-ui/**", "/api-docs/**", "/api/v1/health-check", "/api/v1/user/login/**",
-                    "/api/v1/user/logout", "/api/v1/user/refresh"
+                    "/api/v1/user/logout", "/api/v1/user/refresh", "/api/v1/user/email",
+                    "/api/v1/user/register"
                 ).permitAll()
                     .requestMatchers(
                         "/api/v1/chat/**"

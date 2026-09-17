@@ -4,6 +4,8 @@ import com.quick.jooq.tables.references.NATIVE_USERS
 import com.quick.jooq.tables.references.REFRESH_TOKEN
 import com.quick.jooq.tables.references.USERS
 import com.quick.module.user.dto.vo.UserVo
+import com.quick.module.user.type.AuthType
+import com.quick.module.user.type.Gender
 import com.quick.module.user.type.Role
 import org.jooq.DSLContext
 import org.springframework.stereotype.Repository
@@ -55,11 +57,35 @@ class UserJooqRepository(
                     .and(REFRESH_TOKEN.TOKEN.eq(refreshToken))
             )
 
+    fun existNativeUsersByEmail(email: String): Boolean =
+        dslContext.fetchExists(
+            dslContext.selectFrom(NATIVE_USERS)
+                .where(NATIVE_USERS.EMAIL.eq(email))
+        )
+
     fun createRefreshToken(userId: Long, refreshToken: String, expiresAt: Instant) =
         dslContext.insertInto(REFRESH_TOKEN)
             .set(REFRESH_TOKEN.USER_ID, userId)
             .set(REFRESH_TOKEN.TOKEN, refreshToken)
             .set(REFRESH_TOKEN.EXPIRES_AT, expiresAt)
+            .execute()
+
+    fun createUsersAndGetUsers(
+        authType: AuthType,
+        nickName: String,
+        gender: Gender
+    ) = dslContext.insertInto(USERS)
+        .set(USERS.AUTH_TYPE, authType.value)
+        .set(USERS.NICK_NAME, nickName)
+        .set(USERS.GENDER, gender.value)
+        .returning()
+        .fetchOne()
+
+    fun createNativeUsers(id: Long, email: String, passwordHash: String) =
+        dslContext.insertInto(NATIVE_USERS)
+            .set(NATIVE_USERS.ID, id)
+            .set(NATIVE_USERS.EMAIL, email)
+            .set(NATIVE_USERS.PASSWORD_HASH, passwordHash)
             .execute()
 
     fun deleteRefreshTokenByRefreshToken(refreshToken: String) =
