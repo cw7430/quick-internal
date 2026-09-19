@@ -49,7 +49,7 @@ class CreateNativeUsersTest : UserControllerTest() {
     companion object {
         private const val URL = "$USER_URL/register"
         private val DATA = CreateNativeUserRequestDto.Create(
-            email = "email4@email.com",
+            email = "anything@email.com",
             password = "password1234!@",
             nickName = "닉네임",
             gender = Gender.F
