@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class AcceptChatRoomTest : ChatControllerTest() {
     fun makeChatRoom(): Long {
-        val myUserId = 1L
+        val myUserId = 3L
         val otherUserId = 4L
         val chatRoom =
             chatJooqRepository.createChatRoomAndGet() ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR)
