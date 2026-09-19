@@ -15,6 +15,12 @@ FROM social_users;
 DELETE
 FROM users;
 
+ALTER TABLE chat_message
+    AUTO_INCREMENT = 1;
+ALTER TABLE chat_member
+    AUTO_INCREMENT = 1;
+ALTER TABLE chat_room
+    AUTO_INCREMENT = 1;
 ALTER TABLE refresh_token
     AUTO_INCREMENT = 1;
 ALTER TABLE social_users
