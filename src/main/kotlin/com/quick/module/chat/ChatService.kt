@@ -32,4 +32,12 @@ class ChatService(
         chatJooqRepository.createChatMember(chatRoomId, userId, YN.N)
         log.info { "Create Chat Room successfully for UserId:${reqUserId}, ResponseUserId:${userId}" }
     }
+
+    @Transactional
+    fun acceptChatRoom(chatMemberId: Long) {
+        val userId = jwtUtil.getCurrentUserId()
+        chatJooqRepository.updateChatMemberAccepted(chatMemberId)
+        chatJooqRepository.updateChatRoomUpdatedAt(chatMemberId)
+        log.info { "Accept Chat Room successfully for UserId:${userId}, ChatMemberId:${chatMemberId}" }
+    }
 }
