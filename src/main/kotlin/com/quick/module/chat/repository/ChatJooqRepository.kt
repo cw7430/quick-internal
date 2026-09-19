@@ -43,7 +43,7 @@ class ChatJooqRepository(
 
     fun createChatRoomAndGet() =
         dslContext.insertInto(CHAT_ROOM)
-            .columns()
+            .defaultValues()
             .returning()
             .fetchOne()
 
