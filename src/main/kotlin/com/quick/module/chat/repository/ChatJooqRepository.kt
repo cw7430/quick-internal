@@ -3,8 +3,12 @@ package com.quick.module.chat.repository
 import com.quick.common.type.YN
 import com.quick.jooq.tables.references.CHAT_MEMBER
 import com.quick.jooq.tables.references.CHAT_ROOM
+import com.quick.jooq.tables.references.USERS
+import com.quick.module.chat.dto.response.ChatRoomResponseDto
+import com.quick.module.user.type.Gender
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
+import org.jooq.impl.DSL.multiset
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
@@ -12,6 +16,58 @@ import java.time.Instant
 class ChatJooqRepository(
     private val dslContext: DSLContext
 ) {
+    fun findChatRoomByChatRoomId(chatRoomId: Long): ChatRoomResponseDto.DetailData? {
+        val cm = CHAT_MEMBER.`as`("cm")
+        val cr = CHAT_ROOM.`as`("cr")
+        val u = USERS.`as`("u")
+
+        return dslContext.select(
+            cr.ID,
+            cr.UPDATED_AT,
+            multiset(
+                dslContext.select(
+                    cm.ID,
+                    cm.USER_ID,
+                    u.NICK_NAME,
+                    u.GENDER,
+                    cm.ACCEPTED
+                )
+                    .from(cm)
+                    .join(u).on(cm.USER_ID.eq(u.ID))
+                    .where(cm.CHAT_ROOM_ID.eq(cr.ID))
+            ).convertFrom { result ->
+                result.mapNotNull { record ->
+                    val id = record[cm.ID] ?: return@mapNotNull null
+                    val userId = record[cm.USER_ID] ?: return@mapNotNull null
+                    val nickName = record[u.NICK_NAME] ?: return@mapNotNull null
+                    val gender = Gender.from(record[u.GENDER]) ?: return@mapNotNull null
+                    val accepted = YN.from(record[cm.ACCEPTED]) ?: return@mapNotNull null
+
+                    ChatRoomResponseDto.ChatMember(
+                        chatMemberId = id,
+                        userId = userId,
+                        nickName = nickName,
+                        gender = gender,
+                        accepted = accepted
+                    )
+                }
+            }
+        )
+            .from(cr)
+            .where(cr.ID.eq(chatRoomId))
+            .fetchOne { record ->
+                val id = record[cr.ID] ?: return@fetchOne null
+                val updatedAt = record[cr.UPDATED_AT] ?: return@fetchOne null
+                val memberList = record.value3()
+
+                ChatRoomResponseDto.DetailData(
+                    chatRoomId = id,
+                    updatedAt = updatedAt,
+                    memberList = memberList
+                )
+            }
+    }
+
     fun existActiveChatRoomByUserId(
         reqUserId: Long,
         resUserId: Long
@@ -29,7 +85,7 @@ class ChatJooqRepository(
                         dslContext
                             .select(cmSub.CHAT_ROOM_ID)
                             .from(cmSub)
-                            .innerJoin(cr).on(cmSub.CHAT_ROOM_ID.eq(cr.ID))
+                            .join(cr).on(cmSub.CHAT_ROOM_ID.eq(cr.ID))
                             .where(cmSub.USER_ID.`in`(reqUserId, resUserId))
                             .and(cr.VALID.eq(YN.Y.value))
                             .groupBy(cmSub.CHAT_ROOM_ID)
