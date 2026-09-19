@@ -60,9 +60,15 @@ class ChatJooqRepository(
             .where(CHAT_MEMBER.ID.eq(chatMemberId))
             .execute()
 
-    fun updateChatRoomUpdatedAt(chatRoomId: Long) =
+    fun updateChatRoomUpdatedAt(chatMemberId: Long) =
         dslContext.update(CHAT_ROOM)
             .set(CHAT_ROOM.UPDATED_AT, Instant.now())
-            .where(CHAT_ROOM.ID.eq(chatRoomId))
+            .where(
+                CHAT_ROOM.ID.eq(
+                    dslContext.select(CHAT_MEMBER.CHAT_ROOM_ID)
+                        .from(CHAT_MEMBER)
+                        .where(CHAT_MEMBER.ID.eq(chatMemberId))
+                )
+            )
             .execute()
 }
