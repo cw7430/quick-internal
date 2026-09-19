@@ -10,7 +10,8 @@ interface ChatRoomResponseDto {
         val userId: Long,
         val nickName: String,
         val gender: Gender,
-        val accepted: YN
+        val accepted: YN,
+        val me: YN
     )
 
     data class ListData(
@@ -21,11 +22,11 @@ interface ChatRoomResponseDto {
         val nickName: String,
         val gender: Gender,
         val accepted: YN
-    ): ChatRoomResponseDto
+    ) : ChatRoomResponseDto
 
     data class DetailData(
         val chatRoomId: Long,
         val updatedAt: Instant,
         val memberList: List<ChatMember>
-    ): ChatRoomResponseDto
+    ) : ChatRoomResponseDto
 }
