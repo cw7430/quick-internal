@@ -16,7 +16,36 @@ import java.time.Instant
 class ChatJooqRepository(
     private val dslContext: DSLContext
 ) {
-    fun findChatRoomByChatRoomId(chatRoomId: Long): ChatRoomResponseDto.DetailData? {
+    fun findChatRoomListByUserId(reqUserId: Long): List<ChatRoomResponseDto.ListData> {
+        val myCm = CHAT_MEMBER.`as`("my_cm")
+        val otherCm = CHAT_MEMBER.`as`("other_cm")
+        val cr = CHAT_ROOM.`as`("cr")
+        val u = USERS.`as`("u")
+
+        return dslContext.select(
+            cr.ID.`as`("chatRoomId"),
+            cr.UPDATED_AT,
+            otherCm.ID.`as`("chatMemberId"),
+            otherCm.USER_ID,
+            u.NICK_NAME,
+            u.GENDER,
+            otherCm.ACCEPTED
+        )
+            .from(cr)
+            .join(myCm).on(
+                myCm.CHAT_ROOM_ID.eq(cr.ID)
+                    .and(myCm.USER_ID.eq(reqUserId))
+            )
+            .join(otherCm).on(
+                otherCm.CHAT_ROOM_ID.eq(cr.ID)
+                    .and(otherCm.USER_ID.ne(reqUserId))
+            )
+            .join(u).on(otherCm.USER_ID.eq(u.ID))
+            .orderBy(cr.UPDATED_AT.desc())
+            .fetchInto(ChatRoomResponseDto.ListData::class.java)
+    }
+
+    fun findChatRoomByChatRoomIdAndUserId(chatRoomId: Long, reqUserId: Long): ChatRoomResponseDto.DetailData? {
         val cm = CHAT_MEMBER.`as`("cm")
         val cr = CHAT_ROOM.`as`("cr")
         val u = USERS.`as`("u")
@@ -42,13 +71,15 @@ class ChatJooqRepository(
                     val nickName = record[u.NICK_NAME] ?: return@mapNotNull null
                     val gender = Gender.from(record[u.GENDER]) ?: return@mapNotNull null
                     val accepted = YN.from(record[cm.ACCEPTED]) ?: return@mapNotNull null
+                    val me = if (userId == reqUserId) YN.Y else YN.N
 
                     ChatRoomResponseDto.ChatMember(
                         chatMemberId = id,
                         userId = userId,
                         nickName = nickName,
                         gender = gender,
-                        accepted = accepted
+                        accepted = accepted,
+                        me
                     )
                 }
             }
