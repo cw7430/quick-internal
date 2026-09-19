@@ -50,7 +50,7 @@ class AcceptChatRoomTest : ChatControllerTest() {
     fun failWithInvalidToken() {
         val chatMemberId = makeChatRoom()
         patch("$URL/$chatMemberId").key().auth(INVALID_TOKEN).send()
-            .andExpect(jsonPath("$.code").value(ResponseCode.UNAUTHORIZED.code))
+            .andExpect(jsonPath("$.code").value(ResponseCode.INVALID_TOKEN.code))
             .andExpect(jsonPath("$.message").isNotEmpty())
     }
 
