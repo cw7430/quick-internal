@@ -6,12 +6,15 @@ import com.quick.common.type.YN
 import com.quick.module.chat.repository.ChatJooqRepository
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class CreateChatRoomTest(
-    private val chatJooqRepository: ChatJooqRepository
-) : ChatControllerTest() {
+class CreateChatRoomTest : ChatControllerTest() {
+
+    @Autowired
+    private lateinit var chatJooqRepository: ChatJooqRepository
+
     @Test
     @DisplayName("채팅방 요청 - 성공")
     fun success() {
