@@ -6,6 +6,8 @@ spring:
       enabled: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jooq:
+    sql-dialect: MYSQL
   jackson:
     time-zone: UTC
     mapper:
