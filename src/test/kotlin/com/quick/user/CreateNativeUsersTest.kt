@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class UserControllerCreateNativeUsersTest : UserControllerTest() {
+class CreateNativeUsersTest : UserControllerTest() {
     @Test
     @DisplayName("회원가입 - 성공")
     fun success() {

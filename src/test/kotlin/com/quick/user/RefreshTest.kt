@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class UserControllerRefreshTest : UserControllerTest() {
+class RefreshTest : UserControllerTest() {
 
     @Test
     @DisplayName("토큰 재발급 - 성공")

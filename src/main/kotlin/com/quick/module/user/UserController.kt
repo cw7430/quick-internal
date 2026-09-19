@@ -230,6 +230,7 @@ class UserController(
 
     @PatchMapping("/password")
     @Operation(summary = "비밀번호 변경")
+    @SecurityRequirement(name = "access-token")
     @ApiResponses(
         ApiResponse(
             responseCode = "204", description = "비밀번호 변경 성공"
@@ -289,6 +290,7 @@ class UserController(
 
     @PatchMapping("/nickname")
     @Operation(summary = "닉네임 변경")
+    @SecurityRequirement(name = "access-token")
     @ApiResponses(
         ApiResponse(
             responseCode = "204", description = "닉네임 변경 성공"
