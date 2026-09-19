@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class UserControllerUpdateNickNameTest : UserControllerTest() {
+class UpdateNickNameTest : UserControllerTest() {
     @Test
     @DisplayName("닉네임 변경 - 성공")
     fun success() {

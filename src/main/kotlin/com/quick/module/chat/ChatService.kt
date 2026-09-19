@@ -19,6 +19,9 @@ class ChatService(
     @Transactional
     fun createChatRoom(userId: Long) {
         val reqUserId = jwtUtil.getCurrentUserId()
+        if (userId == reqUserId) {
+            throw CustomException(ResponseCode.CONFLICT)
+        }
         if (chatJooqRepository.existActiveChatRoomByUserId(reqUserId, userId)) {
             throw CustomException(ResponseCode.DUPLICATE_RESOURCE)
         }

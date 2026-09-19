@@ -48,7 +48,7 @@ class WebSecurityConfig(
                     "/api/v1/user/register"
                 ).permitAll()
                     .requestMatchers(
-                        "/api/v1/chat/**"
+                        "/api/v1/user/password", "/api/v1/user/nickname", "/api/v1/chat/room"
                     )
                     .hasAnyRole("USER", "ADMIN")
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

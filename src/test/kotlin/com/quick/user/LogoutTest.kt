@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class UserControllerLogoutTest : UserControllerTest() {
+class LogoutTest : UserControllerTest() {
 
     @Test
     @DisplayName("로그아웃 - 성공")

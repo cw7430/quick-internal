@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-class UserControllerUpdatePasswordTest : UserControllerTest() {
+class UpdatePasswordTest : UserControllerTest() {
 
     @Test
     @DisplayName("비밀번호 변경 - 성공")
