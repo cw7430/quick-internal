@@ -108,23 +108,20 @@ class ChatJooqRepository(
         val cmMain = CHAT_MEMBER.`as`("cm_main")
 
         return dslContext.fetchExists(
-            dslContext
-                .select(cmMain.CHAT_ROOM_ID)
+            DSL.selectOne()
                 .from(cmMain)
-                .where(
-                    cmMain.CHAT_ROOM_ID.`in`(
-                        dslContext
-                            .select(cmSub.CHAT_ROOM_ID)
-                            .from(cmSub)
-                            .join(cr).on(cmSub.CHAT_ROOM_ID.eq(cr.ID))
-                            .where(cmSub.USER_ID.`in`(reqUserId, resUserId))
-                            .and(cr.VALID.eq(YN.Y.value))
-                            .groupBy(cmSub.CHAT_ROOM_ID)
-                            .having(DSL.countDistinct(cmSub.USER_ID).eq(2))
-                    )
-                )
+                .join(cr).on(cmMain.CHAT_ROOM_ID.eq(cr.ID))
+                .where(cmMain.USER_ID.`in`(reqUserId, resUserId))
+                .and(cr.VALID.eq(YN.Y.value))
                 .groupBy(cmMain.CHAT_ROOM_ID)
-                .having(DSL.count().eq(2))
+                .having(DSL.countDistinct(cmMain.USER_ID).eq(2))
+                .and(
+                    DSL.field(
+                        DSL.selectCount()
+                            .from(cmSub)
+                            .where(cmSub.CHAT_ROOM_ID.eq(cmMain.CHAT_ROOM_ID))
+                    ).eq(2)
+                )
         )
     }
 

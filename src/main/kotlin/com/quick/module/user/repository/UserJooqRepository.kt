@@ -8,6 +8,7 @@ import com.quick.module.user.type.AuthType
 import com.quick.module.user.type.Gender
 import com.quick.module.user.type.Role
 import org.jooq.DSLContext
+import org.jooq.impl.DSL
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
@@ -59,20 +60,20 @@ class UserJooqRepository(
     fun existRefreshTokenByUserIdAndToken(userId: Long, refreshToken: String): Boolean =
         dslContext
             .fetchExists(
-                dslContext.selectFrom(REFRESH_TOKEN)
+                DSL.selectOne().from(REFRESH_TOKEN)
                     .where(REFRESH_TOKEN.USER_ID.eq(userId))
                     .and(REFRESH_TOKEN.TOKEN.eq(refreshToken))
             )
 
     fun existNativeUsersByUserId(userId: Long): Boolean =
         dslContext.fetchExists(
-            dslContext.selectFrom(NATIVE_USERS)
+            DSL.selectOne().from(NATIVE_USERS)
                 .where(NATIVE_USERS.ID.eq(userId))
         )
 
     fun existNativeUsersByEmail(email: String): Boolean =
         dslContext.fetchExists(
-            dslContext.selectFrom(NATIVE_USERS)
+            DSL.selectOne().from(NATIVE_USERS)
                 .where(NATIVE_USERS.EMAIL.eq(email))
         )
 
