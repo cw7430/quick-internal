@@ -74,7 +74,7 @@ ORDER BY n;
 
 -- 3. 다음 auto_increment 시작값 설정
 ALTER TABLE users
-    AUTO_INCREMENT = 50001;
+    AUTO_INCREMENT = 1;
 
 -- 4. native_users 기본 데이터 삽입
 INSERT INTO native_users (id, email, password_hash)
@@ -121,10 +121,13 @@ WITH digits (d) AS (SELECT 0
                           CROSS JOIN digits d4)
 SELECT 'Y'
 FROM seq
-WHERE n BETWEEN 5 AND ((SELECT id FROM users ORDER BY id DESC LIMIT 1) / 2)
+WHERE n BETWEEN 1 AND (((SELECT id FROM users ORDER BY id DESC LIMIT 1) - 4) / 2)
 ORDER BY n;
 
--- 6. chat_room 대량 생성
+ALTER TABLE chat_room
+    AUTO_INCREMENT = 1;
+
+-- 7. chat_member 대량 생성
 INSERT INTO chat_member (chat_room_id, user_id, accepted)
 WITH user_info AS (SELECT MAX(id) AS max_id, (MAX(id) - 4) AS user_count
                    FROM users),
@@ -139,3 +142,6 @@ FROM ranked_room cr
                      UNION ALL
                      SELECT 1) m
 ORDER BY cr.id, member_offset;
+
+ALTER TABLE chat_member
+    AUTO_INCREMENT = 1;
