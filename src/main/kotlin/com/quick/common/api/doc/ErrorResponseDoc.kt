@@ -113,6 +113,15 @@ class ErrorResponseDoc {
     }
 
     /** 409 Conflict */
+    class ResourceLimit {
+        @get:Schema(example = "RL")
+        val code: String = ResponseCode.RESOURCE_LIMIT.code
+
+        @get:Schema(example = "항목 갯수 제한을 초과합니다.")
+        val message: String = ResponseCode.RESOURCE_LIMIT.message
+    }
+
+    /** 409 Conflict */
     class Conflict {
         @get:Schema(example = "CF")
         val code: String = ResponseCode.CONFLICT.code

@@ -16,7 +16,12 @@ import java.time.Instant
 class ChatJooqRepository(
     private val dslContext: DSLContext
 ) {
-    fun findChatRoomListByUserId(reqUserId: Long): List<ChatRoomResponseDto.ListData> {
+    fun findChatRoomListByUserId(
+        reqUserId: Long,
+        cursorUpdatedAt: Instant?,
+        cursorChatRoomId: Long?,
+        size: Int = 10
+    ): List<ChatRoomResponseDto.ListData> {
         val myCm = CHAT_MEMBER.`as`("my_cm")
         val otherCm = CHAT_MEMBER.`as`("other_cm")
         val cr = CHAT_ROOM.`as`("cr")
@@ -41,7 +46,22 @@ class ChatJooqRepository(
                     .and(otherCm.USER_ID.ne(reqUserId))
             )
             .join(u).on(otherCm.USER_ID.eq(u.ID))
-            .orderBy(cr.UPDATED_AT.desc())
+            .where(
+                if (cursorUpdatedAt != null && cursorChatRoomId != null) {
+                    cr.UPDATED_AT.lt(cursorUpdatedAt)
+                        .or(
+                            cr.UPDATED_AT.eq(cursorUpdatedAt)
+                                .and(cr.ID.lt(cursorChatRoomId))
+                        )
+                } else {
+                    DSL.noCondition()
+                }
+            )
+            .orderBy(
+                cr.UPDATED_AT.desc(),
+                cr.ID.desc()
+            )
+            .limit(size)
             .fetchInto(ChatRoomResponseDto.ListData::class.java)
     }
 
