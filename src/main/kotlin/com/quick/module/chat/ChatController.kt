@@ -24,7 +24,15 @@ class ChatController(
     @SecurityRequirement(name = "access-token")
     @ApiResponses(
         ApiResponse(
-            responseCode = "204", description = "채팅방 불러오기 성공"
+            responseCode = "200", description = "채팅방 불러오기 성공", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        type = "array",
+                        implementation = ChatRoomResponseDto.ListData::class
+                    )
+                )
+            ]
         ),
         ApiResponse(
             responseCode = "401", description = "인증오류", content = [
