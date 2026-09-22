@@ -37,6 +37,7 @@ enum class ResponseCode(
      * 409 Conflict
      */
     DUPLICATE_RESOURCE("DR", "이미 존재하는 항목입니다.", HttpStatus.CONFLICT),
+    RESOURCE_LIMIT("RL", "항목 갯수 제한을 초과합니다.", HttpStatus.CONFLICT),
     CONFLICT("CF", "요청이 현재 상태와 충돌합니다.", HttpStatus.CONFLICT),
 
     /**

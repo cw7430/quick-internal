@@ -95,6 +95,14 @@ abstract class BaseIntegrationTest {
             "strongpassword123!@",
             false
         )
+
+        @JvmStatic
+        protected val CHAT_LOGIN_DATA = NativeLoginRequestDto(
+            "email4@email.com",
+            "0000",
+            false
+        )
+
         protected const val INVALID_TOKEN = "123dj3w989kp2ekohoiysofhawioerq87retreheiogujigbydfggauid"
     }
 }

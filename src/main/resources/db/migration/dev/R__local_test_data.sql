@@ -92,7 +92,7 @@ FROM users
 WHERE id BETWEEN 5 AND (SELECT id FROM users ORDER BY id DESC LIMIT 1)
 ORDER BY id;
 
--- 6. chat_room 대량 생성
+-- 6. chat_room 대량 생성 - 1
 INSERT INTO chat_room (valid)
 WITH digits (d) AS (SELECT 0
                     UNION ALL
@@ -143,5 +143,66 @@ FROM ranked_room cr
                      SELECT 1) m
 ORDER BY cr.id, member_offset;
 
+ALTER TABLE chat_member
+    AUTO_INCREMENT = 1;
+
+-- 6. chat_room 대량 생성 - 2
+INSERT INTO chat_room (valid)
+WITH digits (d) AS (SELECT 0
+                    UNION ALL
+                    SELECT 1
+                    UNION ALL
+                    SELECT 2
+                    UNION ALL
+                    SELECT 3
+                    UNION ALL
+                    SELECT 4
+                    UNION ALL
+                    SELECT 5
+                    UNION ALL
+                    SELECT 6
+                    UNION ALL
+                    SELECT 7
+                    UNION ALL
+                    SELECT 8
+                    UNION ALL
+                    SELECT 9),
+     seq (n) AS (SELECT d4.d * 10000 + d3.d * 1000 + d2.d * 100 + d1.d * 10 + d0.d
+                 FROM digits d0
+                          CROSS JOIN digits d1
+                          CROSS JOIN digits d2
+                          CROSS JOIN digits d3
+                          CROSS JOIN digits d4)
+SELECT 'Y'
+FROM seq
+WHERE n BETWEEN 1 AND (((SELECT id FROM users ORDER BY id DESC LIMIT 1) - 4) / 2)
+ORDER BY n;
+
+ALTER TABLE chat_room
+    AUTO_INCREMENT = 1;
+
+
+-- 7. chat_member 대량 생성 - 2
+INSERT INTO chat_member (chat_room_id, user_id, accepted)
+VALUES ((((SELECT MAX(id) FROM users) - 4) / 2) + 1,
+        5,
+        'Y'),
+       ((((SELECT MAX(id) FROM users) - 4) / 2) + 1,
+        (SELECT MAX(id) FROM users),
+        'Y');
+
+INSERT INTO chat_member (chat_room_id, user_id, accepted)
+WITH target_rooms AS (SELECT id,
+                             ROW_NUMBER() OVER (ORDER BY id) AS rn
+                      FROM chat_room
+                      WHERE id > (((SELECT MAX(id) FROM users) - 4) / 2) + 1)
+SELECT r.id,
+       6 + ((r.rn - 1) * 2 + m.member_offset),
+       'Y'
+FROM target_rooms r
+         CROSS JOIN (SELECT 0 AS member_offset
+                     UNION ALL
+                     SELECT 1) m
+ORDER BY r.id, m.member_offset;
 ALTER TABLE chat_member
     AUTO_INCREMENT = 1;

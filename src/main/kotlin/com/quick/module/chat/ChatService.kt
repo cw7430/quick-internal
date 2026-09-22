@@ -4,6 +4,8 @@ import com.quick.common.api.exception.CustomException
 import com.quick.common.api.type.ResponseCode
 import com.quick.common.config.security.JwtUtil
 import com.quick.common.type.YN
+import com.quick.module.chat.dto.request.ChatRoomRequestDto
+import com.quick.module.chat.dto.response.ChatRoomResponseDto
 import com.quick.module.chat.repository.ChatJooqRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
@@ -16,6 +18,20 @@ class ChatService(
     private val jwtUtil: JwtUtil,
     private val chatJooqRepository: ChatJooqRepository
 ) {
+    fun getChatRoomList(reqDto: ChatRoomRequestDto): List<ChatRoomResponseDto.ListData> {
+        val reqUserId = jwtUtil.getCurrentUserId()
+        val chatRoomList = chatJooqRepository.findChatRoomListByUserId(
+            reqUserId,
+            cursorUpdatedAt = reqDto.updatedAt,
+            cursorChatRoomId = reqDto.chatRoomId,
+            size = reqDto.size
+        )
+
+        log.info { "Get Chat Room List successfully for UserId:${reqUserId}" }
+
+        return chatRoomList
+    }
+
     @Transactional
     fun createChatRoom(userId: Long) {
         val reqUserId = jwtUtil.getCurrentUserId()
