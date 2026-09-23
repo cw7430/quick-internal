@@ -32,6 +32,15 @@ class ChatService(
         return chatRoomList
     }
 
+    fun getChatRoom(chatRoomId: Long): ChatRoomResponseDto.DetailData {
+        val reqUserId = jwtUtil.getCurrentUserId()
+        val chatRoom = chatJooqRepository.findChatRoomByChatRoomIdAndUserId(chatRoomId, reqUserId)
+            ?: throw CustomException(ResponseCode.RESOURCE_NOT_FOUND)
+
+        log.info { "Get Chat Room successfully for UserId:${reqUserId}" }
+        return chatRoom
+    }
+
     @Transactional
     fun createChatRoom(userId: Long) {
         val reqUserId = jwtUtil.getCurrentUserId()

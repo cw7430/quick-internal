@@ -69,6 +69,62 @@ class ChatController(
             ResponseEntity<List<ChatRoomResponseDto.ListData>> =
         ResponseEntity.ok(chatService.getChatRoomList(reqDto))
 
+    @GetMapping("/room/{chatRoomId}")
+    @Operation(summary = "채팅방 상세보기 불러오기")
+    @SecurityRequirement(name = "access-token")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "200", description = "채팅방 불러오기 성공", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        implementation = ChatRoomResponseDto.DetailData::class
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "404", description = "없는 요소", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.ResourceNotFound::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun getChatRoom(@PathVariable chatRoomId: Long): ResponseEntity<ChatRoomResponseDto.DetailData> =
+        ResponseEntity.ok(chatService.getChatRoom(chatRoomId))
+
     @PostMapping("/room/{userId}")
     @Operation(summary = "채팅방 생성")
     @SecurityRequirement(name = "access-token")
