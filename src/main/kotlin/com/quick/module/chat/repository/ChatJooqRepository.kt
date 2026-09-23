@@ -2,8 +2,10 @@ package com.quick.module.chat.repository
 
 import com.quick.common.type.YN
 import com.quick.jooq.tables.references.CHAT_MEMBER
+import com.quick.jooq.tables.references.CHAT_MESSAGE
 import com.quick.jooq.tables.references.CHAT_ROOM
 import com.quick.jooq.tables.references.USERS
+import com.quick.module.chat.dto.response.ChatMessageResponseDto
 import com.quick.module.chat.dto.response.ChatRoomResponseDto
 import com.quick.module.user.type.Gender
 import org.jooq.DSLContext
@@ -120,6 +122,43 @@ class ChatJooqRepository(
                     memberList = memberList
                 )
             }
+    }
+
+    fun findChatMessageListByChatRoomId(
+        chatRoomId: Long,
+        cursorCreatedAt: Instant?,
+        cursorChatMessageId: Long?,
+        size: Int = 10
+    ): List<ChatMessageResponseDto> {
+        val cms = CHAT_MESSAGE.`as`("cms")
+        val cmb = CHAT_MEMBER.`as`("cmb")
+
+        return dslContext.select(
+            cms.ID.`as`("chatMessageId"), cms.CHAT_MEMBER_ID,
+            cms.MESSAGE,
+            cms.VALID,
+            cms.UNREAD,
+            cms.CREATED_AT,
+            cms.UPDATED_AT
+        ).from(cms)
+            .join(cmb).on(
+                cms.CHAT_MEMBER_ID.eq(cmb.ID)
+                    .and(cmb.CHAT_ROOM_ID.eq(chatRoomId))
+            )
+            .where(
+                if (cursorCreatedAt != null && cursorChatMessageId != null) {
+                    cms.CREATED_AT.lt(cursorCreatedAt)
+                        .or(
+                            cms.CREATED_AT.eq(cursorCreatedAt)
+                                .and(cms.ID.lt(cursorChatMessageId))
+                        )
+                } else {
+                    DSL.noCondition()
+                }
+            )
+            .orderBy(cms.CREATED_AT.desc(), cms.ID.desc())
+            .limit(size)
+            .fetchInto(ChatMessageResponseDto::class.java)
     }
 
     fun existActiveChatRoomByUserId(

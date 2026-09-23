@@ -4,7 +4,9 @@ import com.quick.common.api.exception.CustomException
 import com.quick.common.api.type.ResponseCode
 import com.quick.common.config.security.JwtUtil
 import com.quick.common.type.YN
+import com.quick.module.chat.dto.request.ChatMessageRequestDto
 import com.quick.module.chat.dto.request.ChatRoomRequestDto
+import com.quick.module.chat.dto.response.ChatMessageResponseDto
 import com.quick.module.chat.dto.response.ChatRoomResponseDto
 import com.quick.module.chat.repository.ChatJooqRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -39,6 +41,19 @@ class ChatService(
 
         log.info { "Get Chat Room successfully for UserId:${reqUserId}" }
         return chatRoom
+    }
+
+    fun getMessageList(chatRoomId: Long, reqDto: ChatMessageRequestDto.GetList): List<ChatMessageResponseDto> {
+        val userId = jwtUtil.getCurrentUserId()
+        val chatMessageList = chatJooqRepository.findChatMessageListByChatRoomId(
+            chatRoomId,
+            cursorCreatedAt = reqDto.createdAt,
+            cursorChatMessageId = reqDto.chatMessageId,
+            size = reqDto.size
+        )
+
+        log.info { "Get Chat Message List successfully for UserId:${userId}, ChatRoomId:${chatRoomId}" }
+        return chatMessageList
     }
 
     @Transactional

@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 
 interface ChatRoomResponseDto {
+    @Schema(name = "ChatMemberList")
     data class ChatMember(
         @get:Schema(description = "채팅방 멤버 일련번호", example = "1")
         val chatMemberId: Long,
@@ -21,6 +22,7 @@ interface ChatRoomResponseDto {
         val me: YN
     )
 
+    @Schema(name = "ChatRoomListResponse")
     data class ListData(
         @get:Schema(description = "채팅방 일련번호", example = "1")
         val chatRoomId: Long,
@@ -38,6 +40,7 @@ interface ChatRoomResponseDto {
         val accepted: YN
     ) : ChatRoomResponseDto
 
+    @Schema(name = "ChatRoomResponse")
     data class DetailData(
         @get:Schema(description = "채팅방 일련번호", example = "1")
         val chatRoomId: Long,

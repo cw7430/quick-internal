@@ -1,7 +1,9 @@
 package com.quick.module.chat
 
 import com.quick.common.api.doc.ErrorResponseDoc
+import com.quick.module.chat.dto.request.ChatMessageRequestDto
 import com.quick.module.chat.dto.request.ChatRoomRequestDto
+import com.quick.module.chat.dto.response.ChatMessageResponseDto
 import com.quick.module.chat.dto.response.ChatRoomResponseDto
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -124,6 +126,56 @@ class ChatController(
     )
     fun getChatRoom(@PathVariable chatRoomId: Long): ResponseEntity<ChatRoomResponseDto.DetailData> =
         ResponseEntity.ok(chatService.getChatRoom(chatRoomId))
+
+    @GetMapping("/message/{chatRoomId}")
+    @Operation(summary = "채팅 메세지 목록 불러오기")
+    @SecurityRequirement(name = "access-token")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "200", description = "채팅 메세지 불러오기 성공", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        type = "array",
+                        implementation = ChatMessageResponseDto::class
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun getMessageList(@PathVariable chatRoomId: Long, @ModelAttribute reqDto: ChatMessageRequestDto.GetList):
+            ResponseEntity<List<ChatMessageResponseDto>> =
+        ResponseEntity.ok(chatService.getMessageList(chatRoomId, reqDto))
 
     @PostMapping("/room/{userId}")
     @Operation(summary = "채팅방 생성")
