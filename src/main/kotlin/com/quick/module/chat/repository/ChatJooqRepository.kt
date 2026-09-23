@@ -106,7 +106,6 @@ class ChatJooqRepository(
         )
             .from(cr)
             .where(cr.ID.eq(chatRoomId))
-            .and(cm.USER_ID.`in`(reqUserId))
             .fetchOne { record ->
                 val id = record[cr.ID] ?: return@fetchOne null
                 val updatedAt = record[cr.UPDATED_AT] ?: return@fetchOne null
