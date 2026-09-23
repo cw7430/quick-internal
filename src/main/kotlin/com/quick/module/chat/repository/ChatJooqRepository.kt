@@ -66,7 +66,8 @@ class ChatJooqRepository(
     }
 
     fun findChatRoomByChatRoomIdAndUserId(chatRoomId: Long, reqUserId: Long): ChatRoomResponseDto.DetailData? {
-        val cm = CHAT_MEMBER.`as`("cm")
+        val cmMain = CHAT_MEMBER.`as`("cm_main")
+        val cmSub = CHAT_MEMBER.`as`("cm_sub")
         val cr = CHAT_ROOM.`as`("cr")
         val u = USERS.`as`("u")
 
@@ -75,22 +76,22 @@ class ChatJooqRepository(
             cr.UPDATED_AT,
             multiset(
                 dslContext.select(
-                    cm.ID,
-                    cm.USER_ID,
+                    cmSub.ID,
+                    cmSub.USER_ID,
                     u.NICK_NAME,
                     u.GENDER,
-                    cm.ACCEPTED
+                    cmSub.ACCEPTED
                 )
-                    .from(cm)
-                    .join(u).on(cm.USER_ID.eq(u.ID))
-                    .where(cm.CHAT_ROOM_ID.eq(cr.ID))
+                    .from(cmSub)
+                    .join(u).on(cmSub.USER_ID.eq(u.ID))
+                    .where(cmSub.CHAT_ROOM_ID.eq(cr.ID))
             ).convertFrom { result ->
                 result.mapNotNull { record ->
-                    val id = record[cm.ID] ?: return@mapNotNull null
-                    val userId = record[cm.USER_ID] ?: return@mapNotNull null
+                    val id = record[cmSub.ID] ?: return@mapNotNull null
+                    val userId = record[cmSub.USER_ID] ?: return@mapNotNull null
                     val nickName = record[u.NICK_NAME] ?: return@mapNotNull null
                     val gender = Gender.from(record[u.GENDER]) ?: return@mapNotNull null
-                    val accepted = YN.from(record[cm.ACCEPTED]) ?: return@mapNotNull null
+                    val accepted = YN.from(record[cmSub.ACCEPTED]) ?: return@mapNotNull null
                     val me = if (userId == reqUserId) YN.Y else YN.N
 
                     ChatRoomResponseDto.ChatMember(
@@ -105,7 +106,9 @@ class ChatJooqRepository(
             }
         )
             .from(cr)
+            .join(cmMain).on(cmMain.CHAT_ROOM_ID.eq(cr.ID))
             .where(cr.ID.eq(chatRoomId))
+            .and(cmMain.USER_ID.eq(reqUserId))
             .fetchOne { record ->
                 val id = record[cr.ID] ?: return@fetchOne null
                 val updatedAt = record[cr.UPDATED_AT] ?: return@fetchOne null

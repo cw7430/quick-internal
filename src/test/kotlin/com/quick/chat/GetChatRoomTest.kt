@@ -54,12 +54,12 @@ class GetChatRoomTest : ChatControllerTest() {
     }
 
     @Test
-    @DisplayName("채팅방 상세보기 불러오기 - 찾을 수 없는 요소")
+    @DisplayName("채팅방 상세보기 불러오기 - 권한 오류")
     fun failWithNotFound() {
         val accessToken = authTestUtil.getTestToken(CHAT_LOGIN_DATA).accessToken
         get(INVALID_URL).key().auth(accessToken).send()
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.code").value(ResponseCode.RESOURCE_NOT_FOUND.code))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value(ResponseCode.FORBIDDEN.code))
             .andExpect(jsonPath("$.message").isNotEmpty())
     }
 
