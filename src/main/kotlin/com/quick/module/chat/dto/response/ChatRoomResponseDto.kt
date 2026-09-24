@@ -37,7 +37,11 @@ interface ChatRoomResponseDto {
         @get:Schema(description = "성별", example = "M")
         val gender: Gender,
         @get:Schema(description = "수락여부", example = "N")
-        val accepted: YN
+        val accepted: YN,
+        @get:Schema(description = "마지막 메세지", example = "메세지")
+        val lastMessage: String?,
+        @get:Schema(description = "안 읽은 수", example = "1")
+        val totalUnread:Long
     ) : ChatRoomResponseDto
 
     @Schema(name = "ChatRoomResponse")

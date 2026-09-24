@@ -24,30 +24,57 @@ class ChatJooqRepository(
         cursorChatRoomId: Long?,
         size: Int = 10
     ): List<ChatRoomResponseDto.ListData> {
-        val myCm = CHAT_MEMBER.`as`("my_cm")
-        val otherCm = CHAT_MEMBER.`as`("other_cm")
+        val cmbMe = CHAT_MEMBER.`as`("cmb_me")
+        val cmbOther = CHAT_MEMBER.`as`("cmb_other")
+        val cmbMsg = CHAT_MEMBER.`as`("cmb_msg")
+        val cmsLast = CHAT_MESSAGE.`as`("cms_last")
+        val cmsUnread = CHAT_MESSAGE.`as`("cms_unread")
         val cr = CHAT_ROOM.`as`("cr")
         val u = USERS.`as`("u")
 
-        return dslContext.select(
-            cr.ID.`as`("chatRoomId"),
-            cr.UPDATED_AT,
-            otherCm.ID.`as`("chatMemberId"),
-            otherCm.USER_ID,
-            u.NICK_NAME,
-            u.GENDER,
-            otherCm.ACCEPTED
-        )
+        val lastMessage = DSL
+            .select(cmsLast.MESSAGE)
+            .from(cmsLast)
+            .join(cmbMsg).on(cmbMsg.ID.eq(cmsLast.CHAT_MEMBER_ID))
+            .where(cmbMsg.CHAT_ROOM_ID.eq(cr.ID))
+            .orderBy(
+                cmsLast.UPDATED_AT.desc(),
+                cmsLast.ID.desc()
+            )
+            .limit(1)
+            .asField<String>("lastMessage")
+
+        val totalUnread = DSL
+            .selectCount()
+            .from(cmsUnread)
+            .where(
+                cmsUnread.CHAT_MEMBER_ID.eq(cmbOther.ID)
+                    .and(cmsUnread.UNREAD.gt(0))
+            )
+            .asField<Long>("totalUnread")
+
+        return dslContext
+            .select(
+                cr.ID.`as`("chatRoomId"),
+                cr.UPDATED_AT,
+                cmbOther.ID.`as`("chatMemberId"),
+                cmbOther.USER_ID,
+                u.NICK_NAME,
+                u.GENDER,
+                cmbOther.ACCEPTED,
+                lastMessage,
+                totalUnread
+            )
             .from(cr)
-            .join(myCm).on(
-                myCm.CHAT_ROOM_ID.eq(cr.ID)
-                    .and(myCm.USER_ID.eq(reqUserId))
+            .join(cmbMe).on(
+                cmbMe.CHAT_ROOM_ID.eq(cr.ID)
+                    .and(cmbMe.USER_ID.eq(reqUserId))
             )
-            .join(otherCm).on(
-                otherCm.CHAT_ROOM_ID.eq(cr.ID)
-                    .and(otherCm.USER_ID.ne(reqUserId))
+            .join(cmbOther).on(
+                cmbOther.CHAT_ROOM_ID.eq(cr.ID)
+                    .and(cmbOther.USER_ID.ne(reqUserId))
             )
-            .join(u).on(otherCm.USER_ID.eq(u.ID))
+            .join(u).on(cmbOther.USER_ID.eq(u.ID))
             .where(
                 if (cursorUpdatedAt != null && cursorChatRoomId != null) {
                     cr.UPDATED_AT.lt(cursorUpdatedAt)
