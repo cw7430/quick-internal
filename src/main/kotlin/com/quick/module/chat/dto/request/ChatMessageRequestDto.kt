@@ -1,6 +1,7 @@
 package com.quick.module.chat.dto.request
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.constraints.NotBlank
 import java.time.Instant
 
 interface ChatMessageRequestDto {
@@ -16,11 +17,14 @@ interface ChatMessageRequestDto {
 
     @Schema(name = "CreateAndUpdateChatMessageRequest")
     data class Message(
+        @field:NotBlank(message = "메세지를 입력해주세요.")
+        @get:Schema(description = "메세지", example = "메세지")
         val message: String
     ) : ChatMessageRequestDto
 
     @Schema(name = "UpdateChatMessageReadRequest")
     data class Read(
+        @get:Schema(description = "메세지 일련번호", example = "[1, 2]")
         val chatMessageIdList: List<Long>
     ) : ChatMessageRequestDto
 }

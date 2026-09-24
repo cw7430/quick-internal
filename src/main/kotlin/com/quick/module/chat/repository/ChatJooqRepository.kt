@@ -227,6 +227,14 @@ class ChatJooqRepository(
                 .and(CHAT_MEMBER.USER_ID.eq(userId))
         )
 
+    fun existChatMemberByChatMemberIdAndUserId(chatMemberId: Long, userId: Long) =
+        dslContext.fetchExists(
+            DSL.selectOne()
+                .from(CHAT_MEMBER)
+                .where(CHAT_MEMBER.ID.eq(chatMemberId))
+                .and(CHAT_MEMBER.USER_ID.eq(userId))
+        )
+
     fun existChatMessageByChatMessageIdAndUserId(chatMessageId: Long, userId: Long) =
         dslContext.fetchExists(
             DSL.selectOne()
