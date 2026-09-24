@@ -187,7 +187,7 @@ class ChatJooqRepository(
                     DSL.noCondition()
                 }
             )
-            .and(cms.VALID.eq(YN.Y.value))
+            .and(cms.ACTIVE_FLAG.eq(1))
             .orderBy(cms.CREATED_AT.desc(), cms.ID.desc())
             .limit(size)
             .fetchInto(ChatMessageResponseDto::class.java)
