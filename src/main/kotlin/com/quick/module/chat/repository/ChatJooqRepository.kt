@@ -257,7 +257,7 @@ class ChatJooqRepository(
             .set(CHAT_MEMBER.ACCEPTED, accepted.value)
             .execute()
 
-    fun createChatMessage(chatMemberId: Long, message: String): Int {
+    fun createChatMessageByChatMemberId(chatMemberId: Long, message: String): Int {
         val cmSender = CHAT_MEMBER.`as`("cm_sender")
         val cmOther = CHAT_MEMBER.`as`("cm_other")
 
@@ -281,44 +281,58 @@ class ChatJooqRepository(
             .execute()
     }
 
-    fun updateChatMemberAccepted(chatMemberId: Long) =
+    fun updateChatMemberAcceptedByChatMemberId(chatMemberId: Long) =
         dslContext.update(CHAT_MEMBER)
             .set(CHAT_MEMBER.ACCEPTED, YN.Y.value)
             .where(CHAT_MEMBER.ID.eq(chatMemberId))
             .execute()
 
-    fun updateChatRoomUpdatedAt(chatMemberId: Long) =
+    fun updateChatRoomUpdatedAtByChatMemberId(chatMemberId: Long) =
         dslContext.update(CHAT_ROOM)
             .set(CHAT_ROOM.UPDATED_AT, Instant.now())
             .where(
                 CHAT_ROOM.ID.eq(
-                    dslContext.select(CHAT_MEMBER.CHAT_ROOM_ID)
+                    DSL.select(CHAT_MEMBER.CHAT_ROOM_ID)
                         .from(CHAT_MEMBER)
                         .where(CHAT_MEMBER.ID.eq(chatMemberId))
+                        .limit(1)
                 )
-            )
-            .execute()
+            ).execute()
 
-    fun updateChatRoomInvalid(chatRoomId: Long) =
+    fun updateChatRoomUpdatedAtByChatMessageId(chatMessageId: Long) =
+        dslContext.update(CHAT_ROOM)
+            .set(CHAT_ROOM.UPDATED_AT, Instant.now())
+            .where(
+                CHAT_ROOM.ID.eq(
+                    DSL.select(CHAT_MEMBER.CHAT_ROOM_ID)
+                        .from(CHAT_MEMBER)
+                        .join(CHAT_MESSAGE)
+                        .on(CHAT_MEMBER.ID.eq(CHAT_MESSAGE.CHAT_MEMBER_ID))
+                        .where(CHAT_MESSAGE.ID.eq(chatMessageId))
+                        .limit(1)
+                )
+            ).execute()
+
+    fun updateChatRoomInvalidByChatRoomId(chatRoomId: Long) =
         dslContext.update(CHAT_ROOM)
             .set(CHAT_ROOM.VALID, YN.N.value)
             .set(CHAT_ROOM.DELETED_AT, Instant.now())
             .where(CHAT_ROOM.ID.eq(chatRoomId))
             .execute()
 
-    fun updateChatMessage(chatMessageId: Long, message: String) =
+    fun updateChatMessageByChatMessageId(chatMessageId: Long, message: String) =
         dslContext.update(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.MESSAGE, message)
             .where(CHAT_MESSAGE.ID.eq(chatMessageId))
             .execute()
 
-    fun updateChatMessageRead(chatMessageIdList: List<Long>) =
+    fun updateChatMessageReadByChatMessageIdList(chatMessageIdList: List<Long>) =
         dslContext.update(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.UNREAD, CHAT_MESSAGE.UNREAD.minus(1))
             .where(CHAT_MESSAGE.ID.`in`(chatMessageIdList))
             .execute()
 
-    fun updateChatMessageInvalid(chatMessageId: Long) =
+    fun updateChatMessageInvalidByChatMessageId(chatMessageId: Long) =
         dslContext.update(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.VALID, YN.N.value)
             .set(CHAT_MESSAGE.DELETED_AT, Instant.now())

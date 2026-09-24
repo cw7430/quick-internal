@@ -76,8 +76,8 @@ class ChatService(
     @Transactional
     fun acceptChatRoom(chatMemberId: Long) {
         val userId = jwtUtil.getCurrentUserId()
-        chatJooqRepository.updateChatMemberAccepted(chatMemberId)
-        chatJooqRepository.updateChatRoomUpdatedAt(chatMemberId)
+        chatJooqRepository.updateChatMemberAcceptedByChatMemberId(chatMemberId)
+        chatJooqRepository.updateChatRoomUpdatedAtByChatMemberId(chatMemberId)
         log.info { "Accept Chat Room successfully for UserId:${userId}, ChatMemberId:${chatMemberId}" }
     }
 
@@ -87,18 +87,46 @@ class ChatService(
         if (!chatJooqRepository.existChatMemberByChatRoomIdAndUserId(chatRoomId, userId)) {
             throw CustomException(ResponseCode.FORBIDDEN)
         }
-        chatJooqRepository.updateChatRoomInvalid(chatRoomId)
+        chatJooqRepository.updateChatRoomInvalidByChatRoomId(chatRoomId)
         log.info { "Invalidate Chat Room successfully for UserId:${userId}, ChatRoomId:${chatRoomId}" }
     }
 
     @Transactional
     fun sendChatMessage(chatMemberId: Long, reqDto: ChatMessageRequestDto.Message) {
         val userId = jwtUtil.getCurrentUserId()
-        if(!chatJooqRepository.existChatMemberByChatMemberIdAndUserId(chatMemberId, userId)) {
+        if (!chatJooqRepository.existChatMemberByChatMemberIdAndUserId(chatMemberId, userId)) {
             throw CustomException(ResponseCode.FORBIDDEN)
         }
-        chatJooqRepository.createChatMessage(chatMemberId, reqDto.message)
-        chatJooqRepository.updateChatRoomUpdatedAt(chatMemberId)
+        chatJooqRepository.createChatMessageByChatMemberId(chatMemberId, reqDto.message)
+        chatJooqRepository.updateChatRoomUpdatedAtByChatMemberId(chatMemberId)
         log.info { "Send Chat Message successfully for UserId:${userId}, ChatMemberId:${chatMemberId}" }
+    }
+
+    @Transactional
+    fun updateChatMessage(chatMessageId: Long, reqDto: ChatMessageRequestDto.Message) {
+        val userId = jwtUtil.getCurrentUserId()
+        if (!chatJooqRepository.existChatMessageByChatMessageIdAndUserId(chatMessageId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
+        chatJooqRepository.updateChatMessageByChatMessageId(chatMessageId, reqDto.message)
+        chatJooqRepository.updateChatRoomUpdatedAtByChatMessageId(chatMessageId)
+        log.info { "Update Chat Message successfully for UserId:${userId}, ChatMessageId:${chatMessageId}" }
+    }
+
+    @Transactional
+    fun updateChatMessageRead(reqDto: ChatMessageRequestDto.Read) {
+        val userId = jwtUtil.getCurrentUserId()
+        chatJooqRepository.updateChatMessageReadByChatMessageIdList(reqDto.chatMessageIdList)
+        log.info { "Update Chat Message Read successfully for UserId:${userId}, ChatMessageIdList:${reqDto.chatMessageIdList}" }
+    }
+
+    @Transactional
+    fun invalidateChatMessage(chatMessageId: Long) {
+        val userId = jwtUtil.getCurrentUserId()
+        if (!chatJooqRepository.existChatMessageByChatMessageIdAndUserId(chatMessageId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
+        chatJooqRepository.updateChatMessageInvalidByChatMessageId(chatMessageId)
+        log.info { "Invalidate Chat Message successfully for UserId:${userId}, ChatMessageId:${chatMessageId}" }
     }
 }

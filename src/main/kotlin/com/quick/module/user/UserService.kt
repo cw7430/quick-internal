@@ -153,7 +153,7 @@ class UserService(
         if (passwordEncoder.matches(reqDto.newPassword, formalPassword)) {
             throw CustomException(ResponseCode.DUPLICATE_RESOURCE)
         }
-        userJooqRepository.updatePassword(
+        userJooqRepository.updatePasswordByUserId(
             userId,
             passwordEncoder.encode(reqDto.newPassword)!!
         )
@@ -166,7 +166,7 @@ class UserService(
         if (!userJooqRepository.existNativeUsersByUserId(userId)) {
             throw CustomException(ResponseCode.UNAUTHORIZED)
         }
-        userJooqRepository.updateNickName(userId, reqDto.newNickName)
+        userJooqRepository.updateNickNameByUserId(userId, reqDto.newNickName)
         log.info { "Update NickName successfully for user ID:${userId}" }
     }
 }
