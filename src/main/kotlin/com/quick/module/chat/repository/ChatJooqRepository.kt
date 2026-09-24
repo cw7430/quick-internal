@@ -162,7 +162,6 @@ class ChatJooqRepository(
         size: Int = 10
     ): List<ChatMessageResponseDto> {
         val cms = CHAT_MESSAGE.`as`("cms")
-        val cmb = CHAT_MEMBER.`as`("cmb")
 
         return dslContext.select(
             cms.ID.`as`("chatMessageId"), cms.CHAT_MEMBER_ID,
@@ -172,11 +171,8 @@ class ChatJooqRepository(
             cms.CREATED_AT,
             cms.UPDATED_AT
         ).from(cms)
-            .join(cmb).on(
-                cms.CHAT_MEMBER_ID.eq(cmb.ID)
-                    .and(cmb.CHAT_ROOM_ID.eq(chatRoomId))
-            )
-            .where(
+            .where(cms.CHAT_ROOM_ID.eq(chatRoomId))
+            .and(
                 if (cursorCreatedAt != null && cursorChatMessageId != null) {
                     cms.CREATED_AT.lt(cursorCreatedAt)
                         .or(
@@ -261,6 +257,11 @@ class ChatJooqRepository(
         val cmSender = CHAT_MEMBER.`as`("cm_sender")
         val cmOther = CHAT_MEMBER.`as`("cm_other")
 
+        val chatRoomId = DSL.select(cmSender.CHAT_ROOM_ID)
+            .from(cmSender)
+            .where(cmSender.ID.eq(chatMemberId))
+            .asField<Long>("chat_room_id")
+
         val unread = DSL
             .selectCount()
             .from(cmOther)
@@ -275,6 +276,7 @@ class ChatJooqRepository(
             .asField<Long>("unread")
 
         return dslContext.insertInto(CHAT_MESSAGE)
+            .set(CHAT_MESSAGE.CHAT_ROOM_ID, chatRoomId)
             .set(CHAT_MESSAGE.CHAT_MEMBER_ID, chatMemberId)
             .set(CHAT_MESSAGE.MESSAGE, message)
             .set(CHAT_MESSAGE.UNREAD, unread)
@@ -304,10 +306,8 @@ class ChatJooqRepository(
             .set(CHAT_ROOM.UPDATED_AT, Instant.now())
             .where(
                 CHAT_ROOM.ID.eq(
-                    DSL.select(CHAT_MEMBER.CHAT_ROOM_ID)
-                        .from(CHAT_MEMBER)
-                        .join(CHAT_MESSAGE)
-                        .on(CHAT_MEMBER.ID.eq(CHAT_MESSAGE.CHAT_MEMBER_ID))
+                    DSL.select(CHAT_MESSAGE.CHAT_ROOM_ID)
+                        .from(CHAT_MESSAGE)
                         .where(CHAT_MESSAGE.ID.eq(chatMessageId))
                         .limit(1)
                 )
