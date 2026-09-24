@@ -206,3 +206,66 @@ FROM target_rooms r
 ORDER BY r.id, m.member_offset;
 ALTER TABLE chat_member
     AUTO_INCREMENT = 1;
+
+-- 8. chat_message 대량 생성 - 1
+INSERT INTO chat_message (chat_member_id, message, unread)
+WITH digits (d) AS (SELECT 0
+                    UNION ALL
+                    SELECT 1
+                    UNION ALL
+                    SELECT 2
+                    UNION ALL
+                    SELECT 3
+                    UNION ALL
+                    SELECT 4
+                    UNION ALL
+                    SELECT 5
+                    UNION ALL
+                    SELECT 6
+                    UNION ALL
+                    SELECT 7
+                    UNION ALL
+                    SELECT 8
+                    UNION ALL
+                    SELECT 9),
+     seq (n) AS (SELECT d3.d * 1000
+                            + d2.d * 100
+                            + d1.d * 10
+                            + d0.d
+                 FROM digits d0
+                          CROSS JOIN digits d1
+                          CROSS JOIN digits d2
+                          CROSS JOIN digits d3),
+     messages AS (SELECT 1 AS message_order, 1 AS member_id, '안녕하세요' AS message
+                  UNION ALL
+                  SELECT 2, 2, '안녕하세요'
+                  UNION ALL
+                  SELECT 3, 1, '어디사세요?'
+                  UNION ALL
+                  SELECT 4, 2, '서울이요'
+                  UNION ALL
+                  SELECT 5, 1, '저는 경기도에요'
+                  UNION ALL
+                  SELECT 6, 2, '경기도 어디요?'
+                  UNION ALL
+                  SELECT 7, 1, '용인이에요. 서울어디에요?'
+                  UNION ALL
+                  SELECT 8, 2, '중랑구요'
+                  UNION ALL
+                  SELECT 9, 1, '밥은 드셨어요?'
+                  UNION ALL
+                  SELECT 10, 2, '아뇨')
+SELECT m.member_id,
+       m.message,
+       0
+FROM seq
+         CROSS JOIN messages m
+ORDER BY seq.n, m.message_order;
+ALTER TABLE chat_message
+    AUTO_INCREMENT = 1;
+
+UPDATE chat_message
+SET unread = 1
+ORDER BY id DESC
+LIMIT 2;
+
