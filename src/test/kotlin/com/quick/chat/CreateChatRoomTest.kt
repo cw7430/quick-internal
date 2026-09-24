@@ -57,7 +57,7 @@ class CreateChatRoomTest : ChatControllerTest() {
 
     @Test
     @DisplayName("채팅방 요청 - 본인에게 보낸 요청")
-    fun failWithDuplicateConflict() {
+    fun failWithConflict() {
         val accessToken = authTestUtil.getTestToken(USER_LOGIN_DATA).accessToken
         post(CONFLICT_URL).key().auth(accessToken).send()
             .andExpect(status().isConflict())

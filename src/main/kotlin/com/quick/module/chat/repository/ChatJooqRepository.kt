@@ -219,6 +219,23 @@ class ChatJooqRepository(
         )
     }
 
+    fun existChatMemberByChatRoomIdAndUserId(chatRoomId: Long, userId: Long) =
+        dslContext.fetchExists(
+            DSL.selectOne()
+                .from(CHAT_MEMBER)
+                .where(CHAT_MEMBER.CHAT_ROOM_ID.eq(chatRoomId))
+                .and(CHAT_MEMBER.USER_ID.eq(userId))
+        )
+
+    fun existChatMessageByChatMessageIdAndUserId(chatMessageId: Long, userId: Long) =
+        dslContext.fetchExists(
+            DSL.selectOne()
+                .from(CHAT_MESSAGE)
+                .join(CHAT_MEMBER).on(CHAT_MESSAGE.CHAT_MEMBER_ID.eq(CHAT_MEMBER.ID))
+                .where(CHAT_MESSAGE.ID.eq(chatMessageId))
+                .and(CHAT_MEMBER.USER_ID.eq(userId))
+        )
+
     fun createChatRoomAndGet() =
         dslContext.insertInto(CHAT_ROOM)
             .defaultValues()
@@ -274,6 +291,13 @@ class ChatJooqRepository(
             )
             .execute()
 
+    fun updateChatRoomInvalid(chatRoomId: Long) =
+        dslContext.update(CHAT_ROOM)
+            .set(CHAT_ROOM.VALID, YN.N.value)
+            .set(CHAT_ROOM.DELETED_AT, Instant.now())
+            .where(CHAT_ROOM.ID.eq(chatRoomId))
+            .execute()
+
     fun updateChatMessage(chatMessageId: Long, message: String) =
         dslContext.update(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.MESSAGE, message)
@@ -284,5 +308,12 @@ class ChatJooqRepository(
         dslContext.update(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.UNREAD, CHAT_MESSAGE.UNREAD.minus(1))
             .where(CHAT_MESSAGE.ID.`in`(chatMessageIdList))
+            .execute()
+
+    fun updateChatMessageInvalid(chatMessageId: Long) =
+        dslContext.update(CHAT_MESSAGE)
+            .set(CHAT_MESSAGE.VALID, YN.N.value)
+            .set(CHAT_MESSAGE.DELETED_AT, Instant.now())
+            .where(CHAT_MESSAGE.ID.eq(chatMessageId))
             .execute()
 }
