@@ -37,6 +37,7 @@ class ChatJooqRepository(
             .from(cmsLast)
             .join(cmbMsg).on(cmbMsg.ID.eq(cmsLast.CHAT_MEMBER_ID))
             .where(cmbMsg.CHAT_ROOM_ID.eq(cr.ID))
+            .and(cmsLast.VALID.eq(YN.Y.value))
             .orderBy(
                 cmsLast.UPDATED_AT.desc(),
                 cmsLast.ID.desc()
@@ -51,6 +52,7 @@ class ChatJooqRepository(
                 cmsUnread.CHAT_MEMBER_ID.eq(cmbOther.ID)
                     .and(cmsUnread.UNREAD.gt(0))
             )
+            .and(cmsUnread.VALID.eq(YN.Y.value))
             .asField<Long>("totalUnread")
 
         return dslContext
@@ -86,6 +88,7 @@ class ChatJooqRepository(
                     DSL.noCondition()
                 }
             )
+            .and(cr.VALID.eq(YN.Y.value))
             .orderBy(
                 cr.UPDATED_AT.desc(),
                 cr.ID.desc()
@@ -137,6 +140,7 @@ class ChatJooqRepository(
             .from(cr)
             .join(cmMain).on(cmMain.CHAT_ROOM_ID.eq(cr.ID))
             .where(cr.ID.eq(chatRoomId))
+            .and(cr.VALID.eq(YN.Y.value))
             .and(cmMain.USER_ID.eq(reqUserId))
             .fetchOne { record ->
                 val id = record[cr.ID] ?: return@fetchOne null
@@ -183,6 +187,7 @@ class ChatJooqRepository(
                     DSL.noCondition()
                 }
             )
+            .and(cms.VALID.eq(YN.Y.value))
             .orderBy(cms.CREATED_AT.desc(), cms.ID.desc())
             .limit(size)
             .fetchInto(ChatMessageResponseDto::class.java)
@@ -227,6 +232,30 @@ class ChatJooqRepository(
             .set(CHAT_MEMBER.ACCEPTED, accepted.value)
             .execute()
 
+    fun createChatMessage(chatMemberId: Long, message: String): Int {
+        val cmSender = CHAT_MEMBER.`as`("cm_sender")
+        val cmOther = CHAT_MEMBER.`as`("cm_other")
+
+        val unread = DSL
+            .selectCount()
+            .from(cmOther)
+            .where(
+                cmOther.CHAT_ROOM_ID.eq(
+                    DSL.select(cmSender.CHAT_ROOM_ID)
+                        .from(cmSender)
+                        .where(cmSender.ID.eq(chatMemberId))
+                )
+            )
+            .and(cmOther.ID.ne(chatMemberId))
+            .asField<Long>("unread")
+
+        return dslContext.insertInto(CHAT_MESSAGE)
+            .set(CHAT_MESSAGE.CHAT_MEMBER_ID, chatMemberId)
+            .set(CHAT_MESSAGE.MESSAGE, message)
+            .set(CHAT_MESSAGE.UNREAD, unread)
+            .execute()
+    }
+
     fun updateChatMemberAccepted(chatMemberId: Long) =
         dslContext.update(CHAT_MEMBER)
             .set(CHAT_MEMBER.ACCEPTED, YN.Y.value)
@@ -243,5 +272,17 @@ class ChatJooqRepository(
                         .where(CHAT_MEMBER.ID.eq(chatMemberId))
                 )
             )
+            .execute()
+
+    fun updateChatMessage(chatMessageId: Long, message: String) =
+        dslContext.update(CHAT_MESSAGE)
+            .set(CHAT_MESSAGE.MESSAGE, message)
+            .where(CHAT_MESSAGE.ID.eq(chatMessageId))
+            .execute()
+
+    fun updateChatMessageRead(chatMessageIdList: List<Long>) =
+        dslContext.update(CHAT_MESSAGE)
+            .set(CHAT_MESSAGE.UNREAD, CHAT_MESSAGE.UNREAD.minus(1))
+            .where(CHAT_MESSAGE.ID.`in`(chatMessageIdList))
             .execute()
 }
