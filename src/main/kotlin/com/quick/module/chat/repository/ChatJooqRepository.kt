@@ -260,7 +260,6 @@ class ChatJooqRepository(
         val chatRoomId = DSL.select(cmSender.CHAT_ROOM_ID)
             .from(cmSender)
             .where(cmSender.ID.eq(chatMemberId))
-            .asField<Long>("chat_room_id")
 
         val unread = DSL
             .selectCount()
