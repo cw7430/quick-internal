@@ -90,4 +90,15 @@ class ChatService(
         chatJooqRepository.updateChatRoomInvalid(chatRoomId)
         log.info { "Invalidate Chat Room successfully for UserId:${userId}, ChatRoomId:${chatRoomId}" }
     }
+
+    @Transactional
+    fun sendChatMessage(chatMemberId: Long, reqDto: ChatMessageRequestDto.Message) {
+        val userId = jwtUtil.getCurrentUserId()
+        if(!chatJooqRepository.existChatMemberByChatMemberIdAndUserId(chatMemberId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
+        chatJooqRepository.createChatMessage(chatMemberId, reqDto.message)
+        chatJooqRepository.updateChatRoomUpdatedAt(chatMemberId)
+        log.info { "Send Chat Message successfully for UserId:${userId}, ChatMemberId:${chatMemberId}" }
+    }
 }

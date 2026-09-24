@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -320,6 +321,63 @@ class ChatController(
     )
     fun invalidateChatRoom(@PathVariable chatRoomId: Long): ResponseEntity<Void> {
         chatService.invalidateChatRoom(chatRoomId)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/message/{chatMemberId}")
+    @Operation(summary = "채팅 메세지 보내기")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "채팅방 삭제 성공"
+        ),
+        ApiResponse(
+            responseCode = "400", description = "입력값 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.BadRequest::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "권한 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Forbidden::class, ErrorResponseDoc.KeyError::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun sendChatMessage(
+        @PathVariable chatMemberId: Long,
+        @RequestBody @Valid reqDto: ChatMessageRequestDto.Message
+    ): ResponseEntity<Void> {
+        chatService.sendChatMessage(chatMemberId, reqDto)
         return ResponseEntity.noContent().build()
     }
 }
