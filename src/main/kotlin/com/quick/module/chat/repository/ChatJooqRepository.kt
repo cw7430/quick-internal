@@ -219,6 +219,23 @@ class ChatJooqRepository(
         )
     }
 
+    fun existChatMemberByChatRoomIdAndUserId(chatRoomId: Long, userId: Long) =
+        dslContext.fetchExists(
+            DSL.selectOne()
+                .from(CHAT_MEMBER)
+                .where(CHAT_MEMBER.CHAT_ROOM_ID.eq(chatRoomId))
+                .and(CHAT_MEMBER.USER_ID.eq(userId))
+        )
+
+    fun existChatMessageByChatMessageIdAndUserId(chatMessageId: Long, userId: Long) =
+        dslContext.fetchExists(
+            DSL.selectOne()
+                .from(CHAT_MESSAGE)
+                .join(CHAT_MEMBER).on(CHAT_MESSAGE.CHAT_MEMBER_ID.eq(CHAT_MEMBER.ID))
+                .where(CHAT_MESSAGE.ID.eq(chatMessageId))
+                .and(CHAT_MEMBER.USER_ID.eq(userId))
+        )
+
     fun createChatRoomAndGet() =
         dslContext.insertInto(CHAT_ROOM)
             .defaultValues()

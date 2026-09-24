@@ -100,18 +100,14 @@ class ChatController(
             ]
         ),
         ApiResponse(
-            responseCode = "403", description = "Api Key 오류", content = [
+            responseCode = "403", description = "권한 오류", content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
-                )
-            ]
-        ),
-        ApiResponse(
-            responseCode = "404", description = "없는 요소", content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.ResourceNotFound::class)
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Forbidden::class, ErrorResponseDoc.KeyError::class
+                        ]
+                    )
                 )
             ]
         ),
@@ -275,6 +271,55 @@ class ChatController(
     )
     fun acceptChatRoom(@PathVariable chatMemberId: Long): ResponseEntity<Void> {
         chatService.acceptChatRoom(chatMemberId)
+        return ResponseEntity.noContent().build()
+    }
+
+    @DeleteMapping("/room/{chatRoomId}")
+    @Operation(summary = "채팅방 삭제")
+    @SecurityRequirement(
+        name = "access-token"
+    )
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "채팅방 삭제 성공"
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "권한 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Forbidden::class, ErrorResponseDoc.KeyError::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun invalidateChatRoom(@PathVariable chatRoomId: Long): ResponseEntity<Void> {
+        chatService.invalidateChatRoom(chatRoomId)
         return ResponseEntity.noContent().build()
     }
 }

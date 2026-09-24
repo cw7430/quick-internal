@@ -80,4 +80,14 @@ class ChatService(
         chatJooqRepository.updateChatRoomUpdatedAt(chatMemberId)
         log.info { "Accept Chat Room successfully for UserId:${userId}, ChatMemberId:${chatMemberId}" }
     }
+
+    @Transactional
+    fun invalidateChatRoom(chatRoomId: Long) {
+        val userId = jwtUtil.getCurrentUserId()
+        if (!chatJooqRepository.existChatMemberByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
+        chatJooqRepository.updateChatRoomInvalid(chatRoomId)
+        log.info { "Invalidate Chat Room successfully for UserId:${userId}, ChatRoomId:${chatRoomId}" }
+    }
 }
