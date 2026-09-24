@@ -9,8 +9,10 @@ import com.quick.module.chat.dto.response.ChatMessageResponseDto
 import com.quick.module.chat.dto.response.ChatRoomResponseDto
 import com.quick.module.user.type.Gender
 import org.jooq.DSLContext
+import org.jooq.Field
 import org.jooq.impl.DSL
 import org.jooq.impl.DSL.multiset
+import org.jooq.impl.SQLDataType
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
@@ -261,8 +263,8 @@ class ChatJooqRepository(
             .from(cmSender)
             .where(cmSender.ID.eq(chatMemberId))
 
-        val unread = DSL
-            .selectCount()
+        val unread: Field<Long> = DSL
+            .select(DSL.count().cast(SQLDataType.BIGINT))
             .from(cmOther)
             .where(
                 cmOther.CHAT_ROOM_ID.eq(
@@ -272,7 +274,8 @@ class ChatJooqRepository(
                 )
             )
             .and(cmOther.ID.ne(chatMemberId))
-            .asField<Long>("unread")
+            .asField()
+
 
         return dslContext.insertInto(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.CHAT_ROOM_ID, chatRoomId)
