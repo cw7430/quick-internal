@@ -102,13 +102,13 @@ class UserJooqRepository(
             .set(NATIVE_USERS.PASSWORD_HASH, passwordHash)
             .execute()
 
-    fun updatePassword(userId: Long, passwordHash: String) =
+    fun updatePasswordByUserId(userId: Long, passwordHash: String) =
         dslContext.update(NATIVE_USERS)
             .set(NATIVE_USERS.PASSWORD_HASH, passwordHash)
             .where(NATIVE_USERS.ID.eq(userId))
             .execute()
 
-    fun updateNickName(userId: Long, nickName: String) =
+    fun updateNickNameByUserId(userId: Long, nickName: String) =
         dslContext.update(USERS)
             .set(USERS.NICK_NAME, nickName)
             .where(USERS.ID.eq(userId))
