@@ -6,7 +6,6 @@ import com.quick.jooq.tables.references.USERS
 import com.quick.module.user.dto.vo.UserVo
 import com.quick.module.user.type.AuthType
 import com.quick.module.user.type.Gender
-import com.quick.module.user.type.Role
 import org.jooq.DSLContext
 import org.jooq.impl.DSL
 import org.springframework.stereotype.Repository
@@ -31,7 +30,7 @@ class UserJooqRepository(
             .from(USERS)
             .join(NATIVE_USERS).on(USERS.ID.eq(NATIVE_USERS.ID))
             .where(NATIVE_USERS.EMAIL.eq(email))
-            .and(USERS.ROLE.ne(Role.LEFT.value))
+            .and(USERS.ACTIVE_FLAG.isNotNull)
             .fetchOneInto(UserVo.NativeLogin::class.java)
 
     fun findRefreshInfoByUserId(userId: Long): UserVo.Public? =
@@ -47,7 +46,7 @@ class UserJooqRepository(
             )
             .from(USERS)
             .where(USERS.ID.eq(userId))
-            .and(USERS.ROLE.ne(Role.LEFT.value))
+            .and(USERS.ACTIVE_FLAG.isNotNull)
             .fetchOneInto(UserVo.Public::class.java)
 
     fun findPasswordByUserId(userId: Long): String? =

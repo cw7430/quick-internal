@@ -28,34 +28,30 @@ class ChatJooqRepository(
     ): List<ChatRoomResponseDto.ListData> {
         val cmbMe = CHAT_MEMBER.`as`("cmb_me")
         val cmbOther = CHAT_MEMBER.`as`("cmb_other")
-        val cmbMsg = CHAT_MEMBER.`as`("cmb_msg")
         val cmsLast = CHAT_MESSAGE.`as`("cms_last")
         val cmsUnread = CHAT_MESSAGE.`as`("cms_unread")
         val cr = CHAT_ROOM.`as`("cr")
         val u = USERS.`as`("u")
 
-        val lastMessage = DSL
+        val lastMessage: Field<String> = DSL
             .select(cmsLast.MESSAGE)
             .from(cmsLast)
-            .join(cmbMsg).on(cmbMsg.ID.eq(cmsLast.CHAT_MEMBER_ID))
-            .where(cmbMsg.CHAT_ROOM_ID.eq(cr.ID))
-            .and(cmsLast.VALID.eq(YN.Y.value))
+            .where(cmsLast.CHAT_ROOM_ID.eq(cr.ID))
+            .and(cmsLast.ACTIVE_FLAG.eq(1))
             .orderBy(
-                cmsLast.UPDATED_AT.desc(),
+                cmsLast.CREATED_AT.desc(),
                 cmsLast.ID.desc()
             )
             .limit(1)
-            .asField<String>("lastMessage")
+            .asField()
 
-        val totalUnread = DSL
+        val totalUnread: Field<Long> = DSL
             .selectCount()
             .from(cmsUnread)
-            .where(
-                cmsUnread.CHAT_MEMBER_ID.eq(cmbOther.ID)
-                    .and(cmsUnread.UNREAD.gt(0))
-            )
-            .and(cmsUnread.VALID.eq(YN.Y.value))
-            .asField<Long>("totalUnread")
+            .where(cmsUnread.CHAT_MEMBER_ID.eq(cmbOther.ID))
+            .and(cmsUnread.UNREAD.gt(0))
+            .and(cmsUnread.ACTIVE_FLAG.eq(1))
+            .asField()
 
         return dslContext
             .select(
@@ -90,7 +86,7 @@ class ChatJooqRepository(
                     DSL.noCondition()
                 }
             )
-            .and(cr.VALID.eq(YN.Y.value))
+            .and(cr.ACTIVE_FLAG.eq(1))
             .orderBy(
                 cr.UPDATED_AT.desc(),
                 cr.ID.desc()
@@ -142,7 +138,7 @@ class ChatJooqRepository(
             .from(cr)
             .join(cmMain).on(cmMain.CHAT_ROOM_ID.eq(cr.ID))
             .where(cr.ID.eq(chatRoomId))
-            .and(cr.VALID.eq(YN.Y.value))
+            .and(cr.ACTIVE_FLAG.eq(1))
             .and(cmMain.USER_ID.eq(reqUserId))
             .fetchOne { record ->
                 val id = record[cr.ID] ?: return@fetchOne null
@@ -204,7 +200,7 @@ class ChatJooqRepository(
                 .from(cmMain)
                 .join(cr).on(cmMain.CHAT_ROOM_ID.eq(cr.ID))
                 .where(cmMain.USER_ID.`in`(reqUserId, resUserId))
-                .and(cr.VALID.eq(YN.Y.value))
+                .and(cr.ACTIVE_FLAG.eq(1))
                 .groupBy(cmMain.CHAT_ROOM_ID)
                 .having(DSL.countDistinct(cmMain.USER_ID).eq(2))
                 .and(
