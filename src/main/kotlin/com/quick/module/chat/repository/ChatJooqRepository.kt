@@ -33,65 +33,66 @@ class ChatJooqRepository(
         val cr = CHAT_ROOM.`as`("cr")
         val u = USERS.`as`("u")
 
-        val lastMessage: Field<String> = DSL
-            .select(cmsLast.MESSAGE)
+        val cursorCondition = if (cursorUpdatedAt != null && cursorChatRoomId != null) {
+            cr.UPDATED_AT.lt(cursorUpdatedAt)
+                .or(cr.UPDATED_AT.eq(cursorUpdatedAt).and(cr.ID.lt(cursorChatRoomId)))
+        } else {
+            DSL.noCondition()
+        }
+
+        val targetTable = DSL.name("target")
+        val fRoomId = cr.ID.`as`("chatRoomId")
+        val fUpdatedAt = cr.UPDATED_AT.`as`("updatedAt")
+        val fMemberId = cmbOther.ID.`as`("chatMemberId")
+        val fUserId = cmbOther.USER_ID.`as`("userId")
+        val fNickName = u.NICK_NAME.`as`("nickName")
+        val fGender = u.GENDER.`as`("gender")
+        val fAccepted = cmbOther.ACCEPTED.`as`("accepted")
+
+        val targetCte = targetTable.`as`(
+            DSL.select(fRoomId, fUpdatedAt, fMemberId, fUserId, fNickName, fGender, fAccepted)
+                .from(cr)
+                .join(cmbMe).on(cmbMe.CHAT_ROOM_ID.eq(cr.ID).and(cmbMe.USER_ID.eq(reqUserId)))
+                .join(cmbOther).on(cmbOther.CHAT_ROOM_ID.eq(cr.ID).and(cmbOther.USER_ID.ne(reqUserId)))
+                .join(u).on(cmbOther.USER_ID.eq(u.ID))
+                .where(cr.ACTIVE_FLAG.eq(1))
+                .and(cursorCondition)
+                .orderBy(cr.UPDATED_AT.desc(), cr.ID.desc())
+                .limit(size)
+        )
+
+        val tRoomId = targetCte.field(fRoomId)!!
+        val tMemberId = targetCte.field(fMemberId)!!
+
+        val lastMessage: Field<String> = DSL.select(cmsLast.MESSAGE)
             .from(cmsLast)
-            .where(cmsLast.CHAT_ROOM_ID.eq(cr.ID))
+            .where(cmsLast.CHAT_ROOM_ID.eq(tRoomId))
             .and(cmsLast.ACTIVE_FLAG.eq(1))
-            .orderBy(
-                cmsLast.CREATED_AT.desc(),
-                cmsLast.ID.desc()
-            )
+            .orderBy(cmsLast.CREATED_AT.desc(), cmsLast.ID.desc())
             .limit(1)
             .asField()
 
-        val totalUnread: Field<Long> = DSL
-            .selectCount()
+        val totalUnread: Field<Long> = DSL.selectCount()
             .from(cmsUnread)
-            .where(cmsUnread.CHAT_MEMBER_ID.eq(cmbOther.ID))
+            .where(cmsUnread.CHAT_MEMBER_ID.eq(tMemberId))
             .and(cmsUnread.UNREAD.gt(0))
             .and(cmsUnread.ACTIVE_FLAG.eq(1))
             .asField()
 
         return dslContext
+            .with(targetCte)
             .select(
-                cr.ID.`as`("chatRoomId"),
-                cr.UPDATED_AT,
-                cmbOther.ID.`as`("chatMemberId"),
-                cmbOther.USER_ID,
-                u.NICK_NAME,
-                u.GENDER,
-                cmbOther.ACCEPTED,
+                targetCte.field(fRoomId),
+                targetCte.field(fUpdatedAt),
+                targetCte.field(fMemberId),
+                targetCte.field(fUserId),
+                targetCte.field(fNickName),
+                targetCte.field(fGender),
+                targetCte.field(fAccepted),
                 lastMessage,
                 totalUnread
             )
-            .from(cr)
-            .join(cmbMe).on(
-                cmbMe.CHAT_ROOM_ID.eq(cr.ID)
-                    .and(cmbMe.USER_ID.eq(reqUserId))
-            )
-            .join(cmbOther).on(
-                cmbOther.CHAT_ROOM_ID.eq(cr.ID)
-                    .and(cmbOther.USER_ID.ne(reqUserId))
-            )
-            .join(u).on(cmbOther.USER_ID.eq(u.ID))
-            .where(
-                if (cursorUpdatedAt != null && cursorChatRoomId != null) {
-                    cr.UPDATED_AT.lt(cursorUpdatedAt)
-                        .or(
-                            cr.UPDATED_AT.eq(cursorUpdatedAt)
-                                .and(cr.ID.lt(cursorChatRoomId))
-                        )
-                } else {
-                    DSL.noCondition()
-                }
-            )
-            .and(cr.ACTIVE_FLAG.eq(1))
-            .orderBy(
-                cr.UPDATED_AT.desc(),
-                cr.ID.desc()
-            )
-            .limit(size)
+            .from(targetCte)
             .fetchInto(ChatRoomResponseDto.ListData::class.java)
     }
 
