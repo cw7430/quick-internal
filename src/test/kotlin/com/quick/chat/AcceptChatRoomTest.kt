@@ -37,7 +37,7 @@ class AcceptChatRoomTest : ChatControllerTest() {
     }
 
     @Test
-    @DisplayName("채팅방 요청 - 인증 오류")
+    @DisplayName("채팅방 수락 - 인증 오류")
     fun failWithUnauthorized() {
         val chatMemberId = makeChatRoom()
         patch("$URL/$chatMemberId").key().send()
@@ -46,7 +46,7 @@ class AcceptChatRoomTest : ChatControllerTest() {
     }
 
     @Test
-    @DisplayName("채팅방 요청 - 잘못 된 토큰")
+    @DisplayName("채팅방 수락 - 잘못 된 토큰")
     fun failWithInvalidToken() {
         val chatMemberId = makeChatRoom()
         patch("$URL/$chatMemberId").key().auth(INVALID_TOKEN).send()
@@ -55,7 +55,7 @@ class AcceptChatRoomTest : ChatControllerTest() {
     }
 
     @Test
-    @DisplayName("채팅방 요청 - 만료 된 토큰")
+    @DisplayName("채팅방 수락 - 만료 된 토큰")
     fun failWithExpiredToken() {
         val chatMemberId = makeChatRoom()
         val accessToken = authTestUtil.generateExpiredAccessToken(USER_LOGIN_DATA)
@@ -66,7 +66,17 @@ class AcceptChatRoomTest : ChatControllerTest() {
     }
 
     @Test
-    @DisplayName("채팅방 요청 - Api Key 오류")
+    @DisplayName("채팅방 수락 - 권한 오류")
+    fun failWithForbidden() {
+        val accessToken = authTestUtil.getTestToken(USER_LOGIN_DATA).accessToken
+        patch("$URL/1").key().auth(accessToken).send()
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value(ResponseCode.FORBIDDEN.code))
+            .andExpect(jsonPath("$.message").isNotEmpty())
+    }
+
+    @Test
+    @DisplayName("채팅방 수락 - Api Key 오류")
     fun failWithKeyError() {
         val chatMemberId = makeChatRoom()
         val accessToken = authTestUtil.getTestToken(USER_LOGIN_DATA).accessToken

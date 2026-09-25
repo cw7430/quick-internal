@@ -45,6 +45,9 @@ class ChatService(
 
     fun getMessageList(chatRoomId: Long, reqDto: ChatMessageRequestDto.GetList): List<ChatMessageResponseDto> {
         val userId = jwtUtil.getCurrentUserId()
+        if (!chatJooqRepository.existChatMemberByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
         val chatMessageList = chatJooqRepository.findChatMessageListByChatRoomId(
             chatRoomId,
             cursorCreatedAt = reqDto.createdAt,
@@ -76,6 +79,9 @@ class ChatService(
     @Transactional
     fun acceptChatRoom(chatMemberId: Long) {
         val userId = jwtUtil.getCurrentUserId()
+        if (!chatJooqRepository.existChatMemberByChatMemberIdAndUserId(chatMemberId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
         chatJooqRepository.updateChatMemberAcceptedByChatMemberId(chatMemberId)
         chatJooqRepository.updateChatRoomUpdatedAtByChatMemberId(chatMemberId)
         log.info { "Accept Chat Room successfully for UserId:${userId}, ChatMemberId:${chatMemberId}" }
@@ -114,8 +120,11 @@ class ChatService(
     }
 
     @Transactional
-    fun updateChatMessageRead(reqDto: ChatMessageRequestDto.Read) {
+    fun updateChatMessageRead(chatRoomId: Long, reqDto: ChatMessageRequestDto.Read) {
         val userId = jwtUtil.getCurrentUserId()
+        if (!chatJooqRepository.existChatMemberByChatRoomIdAndUserId(chatRoomId, userId)) {
+            throw CustomException(ResponseCode.FORBIDDEN)
+        }
         chatJooqRepository.updateChatMessageReadByChatMessageIdList(reqDto.chatMessageIdList)
         log.info { "Update Chat Message Read successfully for UserId:${userId}, ChatMessageIdList:${reqDto.chatMessageIdList}" }
     }

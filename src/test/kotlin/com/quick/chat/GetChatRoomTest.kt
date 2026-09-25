@@ -44,6 +44,16 @@ class GetChatRoomTest : ChatControllerTest() {
     }
 
     @Test
+    @DisplayName("채팅방 상세보기 불러오기 - 권한 오류")
+    fun failWithForbidden() {
+        val accessToken = authTestUtil.getTestToken(CHAT_LOGIN_DATA).accessToken
+        get(FORBIDDEN_URL).key().auth(accessToken).send()
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value(ResponseCode.FORBIDDEN.code))
+            .andExpect(jsonPath("$.message").isNotEmpty())
+    }
+
+    @Test
     @DisplayName("채팅방 상세보기 불러오기 - Api Key 오류")
     fun failWithKeyError() {
         val accessToken = authTestUtil.getTestToken(CHAT_LOGIN_DATA).accessToken
@@ -53,18 +63,8 @@ class GetChatRoomTest : ChatControllerTest() {
             .andExpect(jsonPath("$.message").isNotEmpty())
     }
 
-    @Test
-    @DisplayName("채팅방 상세보기 불러오기 - 권한 오류")
-    fun failWithNotFound() {
-        val accessToken = authTestUtil.getTestToken(CHAT_LOGIN_DATA).accessToken
-        get(INVALID_URL).key().auth(accessToken).send()
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.code").value(ResponseCode.FORBIDDEN.code))
-            .andExpect(jsonPath("$.message").isNotEmpty())
-    }
-
     companion object {
         private const val URL = "$CHAT_URL/room/1"
-        private const val INVALID_URL = "$CHAT_URL/room/2"
+        private const val FORBIDDEN_URL = "$CHAT_URL/room/2"
     }
 }

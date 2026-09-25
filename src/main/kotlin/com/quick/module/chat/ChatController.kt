@@ -154,10 +154,14 @@ class ChatController(
             ]
         ),
         ApiResponse(
-            responseCode = "403", description = "Api Key 오류", content = [
+            responseCode = "403", description = "권한 오류", content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Forbidden::class, ErrorResponseDoc.KeyError::class
+                        ]
+                    )
                 )
             ]
         ),
@@ -252,10 +256,14 @@ class ChatController(
             ]
         ),
         ApiResponse(
-            responseCode = "403", description = "Api Key 오류", content = [
+            responseCode = "403", description = "권한 오류", content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Forbidden::class, ErrorResponseDoc.KeyError::class
+                        ]
+                    )
                 )
             ]
         ),
@@ -436,7 +444,7 @@ class ChatController(
         return ResponseEntity.noContent().build()
     }
 
-    @PatchMapping("/message/read")
+    @PatchMapping("/message/read/{chatRoomId}")
     @Operation(summary = "채팅 메세지 읽음 처리")
     @SecurityRequirement(name = "access-token")
     @ApiResponses(
@@ -458,10 +466,14 @@ class ChatController(
             ]
         ),
         ApiResponse(
-            responseCode = "403", description = "Api Key 오류", content = [
+            responseCode = "403", description = "권한 오류", content = [
                 Content(
                     mediaType = "application/json",
-                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Forbidden::class, ErrorResponseDoc.KeyError::class
+                        ]
+                    )
                 )
             ]
         ),
@@ -475,9 +487,10 @@ class ChatController(
         )
     )
     fun updateChatMessageRead(
+        @PathVariable chatRoomId: Long,
         @RequestBody reqDto: ChatMessageRequestDto.Read
     ): ResponseEntity<Void> {
-        chatService.updateChatMessageRead(reqDto)
+        chatService.updateChatMessageRead(chatRoomId, reqDto)
         return ResponseEntity.noContent().build()
     }
 
