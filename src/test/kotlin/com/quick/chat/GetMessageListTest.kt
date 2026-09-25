@@ -43,6 +43,16 @@ class GetMessageListTest : ChatControllerTest() {
     }
 
     @Test
+    @DisplayName("채팅방 상세보기 불러오기 - 권한 오류")
+    fun failWithForbidden() {
+        val accessToken = authTestUtil.getTestToken(CHAT_LOGIN_DATA).accessToken
+        get(FORBIDDEN_URL).key().auth(accessToken).send()
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value(ResponseCode.FORBIDDEN.code))
+            .andExpect(jsonPath("$.message").isNotEmpty())
+    }
+
+    @Test
     @DisplayName("채팅 메세지 목록 불러오기 - Api Key 오류")
     fun failWithKeyError() {
         val accessToken = authTestUtil.getTestToken(CHAT_LOGIN_DATA).accessToken
@@ -54,5 +64,6 @@ class GetMessageListTest : ChatControllerTest() {
 
     companion object {
         private const val URL = "$CHAT_URL/message/1"
+        private const val FORBIDDEN_URL = "$CHAT_URL/room/2"
     }
 }
