@@ -302,3 +302,4 @@ HAVING COUNT(*) = 2
 ORDER BY cm.chat_room_id;
 ALTER TABLE alarm
     AUTO_INCREMENT = 1;
+
