@@ -223,8 +223,9 @@ class ChatJooqRepository(
             messageField,
             cms.VALID,
             cms.UNREAD,
+            cms.UPDATED,
             cms.CREATED_AT,
-            cms.UPDATED_AT
+            cms.UPDATED_MESSAGE_AT
         ).from(cms)
             .where(cms.CHAT_ROOM_ID.eq(chatRoomId))
             .and(
@@ -248,8 +249,9 @@ class ChatJooqRepository(
                     message = record[messageField] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
                     valid = YN.from(record[cms.VALID]) ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
                     unread = record[cms.UNREAD] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    updated = YN.from(record[cms.UPDATED]) ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
                     createdAt = record[cms.CREATED_AT] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
-                    updatedAt = record[cms.UPDATED_AT] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR)
+                    updatedMessageAt = record[cms.UPDATED_MESSAGE_AT]
                 )
             }
     }
@@ -388,6 +390,8 @@ class ChatJooqRepository(
     fun updateChatMessageByChatMessageId(chatMessageId: Long, message: String) =
         dslContext.update(CHAT_MESSAGE)
             .set(CHAT_MESSAGE.MESSAGE, message)
+            .set(CHAT_MESSAGE.UPDATED, YN.Y.value)
+            .set(CHAT_MESSAGE.UPDATED_MESSAGE_AT, Instant.now())
             .where(CHAT_MESSAGE.ID.eq(chatMessageId))
             .execute()
 
