@@ -16,8 +16,10 @@ data class ChatMessageResponseDto(
     val valid: YN,
     @get:Schema(description = "안 읽은 수", example = "1")
     val unread: Long,
+    @get:Schema(description = "수정 여부", example = "Y")
+    val updated: YN,
     @get:Schema(description = "생성일시", example = "2026-01-01T00:00:00Z")
     val createdAt: Instant,
-    @get:Schema(description = "수정일시", example = "2026-01-01T00:00:00Z")
-    val updatedAt: Instant,
+    @get:Schema(description = "메세지 수정일시", example = "2026-01-01T00:00:00Z")
+    val updatedMessageAt: Instant?,
 )
