@@ -18,7 +18,7 @@ class UpdateChatMessageReadTest : ChatControllerTest() {
     }
 
     @Test
-    @DisplayName("채팅 메세지 보내기 - 인증 오류")
+    @DisplayName("채팅 읽기 처리 - 인증 오류")
     fun failWithUnauthorized() {
         patch(URL).key().body(DATA).send()
             .andExpect(status().isUnauthorized())
