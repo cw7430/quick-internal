@@ -104,7 +104,7 @@ class ChatJooqRepository(
                 cmsLast.ID.desc()
             )
             .limit(1)
-            .asField()
+            .asField("lastMessage")
 
         val totalUnread: Field<Long> = DSL
             .selectCount()
@@ -112,7 +112,7 @@ class ChatJooqRepository(
             .where(cmsUnread.CHAT_MEMBER_ID.eq(targetChatMemberId))
             .and(cmsUnread.UNREAD.gt(0))
             .and(cmsUnread.ACTIVE_FLAG.eq(1))
-            .asField()
+            .asField("totalUnread")
 
         return dslContext
             .select(
@@ -218,7 +218,8 @@ class ChatJooqRepository(
         ).`as`("message")
 
         return dslContext.select(
-            cms.ID.`as`("chatMessageId"), cms.CHAT_MEMBER_ID,
+            cms.ID,
+            cms.CHAT_MEMBER_ID,
             messageField,
             cms.VALID,
             cms.UNREAD,
