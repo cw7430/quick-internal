@@ -1,5 +1,7 @@
 package com.quick.module.chat.repository
 
+import com.quick.common.api.exception.CustomException
+import com.quick.common.api.type.ResponseCode
 import com.quick.common.type.YN
 import com.quick.jooq.tables.references.CHAT_MEMBER
 import com.quick.jooq.tables.references.CHAT_MESSAGE
@@ -82,6 +84,16 @@ class ChatJooqRepository(
         val targetChatMemberId =
             target.field("chatMemberId", Long::class.java)!!
 
+        val targetUserId =
+            target.field("userId", Long::class.java)!!
+
+        val targetNickName =
+            target.field("nickName", String::class.java)!!
+
+        val targetGender = target.field("gender", String::class.java)!!
+
+        val targetAccepted = target.field("accepted", String::class.java)!!
+
         val lastMessage: Field<String> = DSL
             .select(cmsLast.MESSAGE)
             .from(cmsLast)
@@ -107,15 +119,30 @@ class ChatJooqRepository(
                 targetChatRoomId,
                 targetUpdatedAt,
                 targetChatMemberId,
-                target.field("userId"),
-                target.field("nickName"),
-                target.field("gender"),
-                target.field("accepted"),
-                lastMessage.`as`("lastMessage"),
-                totalUnread.`as`("totalUnread")
+                targetUserId,
+                targetNickName,
+                targetGender,
+                targetAccepted,
+                lastMessage,
+                totalUnread
             )
             .from(target)
-            .fetchInto(ChatRoomResponseDto.ListData::class.java)
+            .fetch { record ->
+                ChatRoomResponseDto.ListData(
+                    chatRoomId = record[targetChatRoomId] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    updatedAt = record[targetUpdatedAt] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    chatMemberId = record[targetChatMemberId]
+                        ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    userId = record[targetUserId] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    nickName = record[targetNickName] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    gender = Gender.from(record[targetGender])
+                        ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    accepted = YN.from(record[targetAccepted])
+                        ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    lastMessage = record[lastMessage],
+                    totalUnread = record[totalUnread]
+                )
+            }
     }
 
     fun findChatRoomByChatRoomIdAndUserId(chatRoomId: Long, reqUserId: Long): ChatRoomResponseDto.DetailData? {
@@ -184,9 +211,15 @@ class ChatJooqRepository(
     ): List<ChatMessageResponseDto> {
         val cms = CHAT_MESSAGE.`as`("cms")
 
+        val messageField = DSL.iif(
+            cms.VALID.eq(YN.Y.value),
+            cms.MESSAGE,
+            "메세지가 삭제되었습니다."
+        ).`as`("message")
+
         return dslContext.select(
             cms.ID.`as`("chatMessageId"), cms.CHAT_MEMBER_ID,
-            cms.MESSAGE,
+            messageField,
             cms.VALID,
             cms.UNREAD,
             cms.CREATED_AT,
@@ -204,10 +237,20 @@ class ChatJooqRepository(
                     DSL.noCondition()
                 }
             )
-            .and(cms.ACTIVE_FLAG.eq(1))
             .orderBy(cms.CREATED_AT.desc(), cms.ID.desc())
             .limit(size)
-            .fetchInto(ChatMessageResponseDto::class.java)
+            .fetch { record ->
+                ChatMessageResponseDto(
+                    chatMessageId = record[cms.ID] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    chatMemberId = record[cms.CHAT_MEMBER_ID]
+                        ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    message = record[messageField] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    valid = YN.from(record[cms.VALID]) ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    unread = record[cms.UNREAD] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    createdAt = record[cms.CREATED_AT] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR),
+                    updatedAt = record[cms.UPDATED_AT] ?: throw CustomException(ResponseCode.INTERNAL_SERVER_ERROR)
+                )
+            }
     }
 
     fun existActiveChatRoomByUserId(
