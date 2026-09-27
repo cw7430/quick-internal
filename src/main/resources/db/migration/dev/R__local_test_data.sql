@@ -1,6 +1,10 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 DELETE
+FROM chat_message_alarm;
+DELETE
+FROM alarm;
+DELETE
 FROM chat_message;
 DELETE
 FROM chat_member;
@@ -15,6 +19,10 @@ FROM social_users;
 DELETE
 FROM users;
 
+ALTER TABLE chat_message_alarm
+    AUTO_INCREMENT = 1;
+ALTER TABLE alarm
+    AUTO_INCREMENT = 1;
 ALTER TABLE chat_message
     AUTO_INCREMENT = 1;
 ALTER TABLE chat_member
@@ -276,8 +284,8 @@ INSERT INTO alarm (my_user_id,
                    other_user_id,
                    chat_room_id,
                    type)
-SELECT MIN(cm.user_id),
-       MAX(cm.user_id),
+SELECT MAX(cm.user_id),
+       MIN(cm.user_id),
        cm.chat_room_id,
        'CREATE'
 FROM chat_member cm
@@ -292,8 +300,8 @@ INSERT INTO alarm (my_user_id,
                    other_user_id,
                    chat_room_id,
                    type)
-SELECT MAX(cm.user_id),
-       MIN(cm.user_id),
+SELECT MIN(cm.user_id),
+       MAX(cm.user_id),
        cm.chat_room_id,
        'ACCEPT'
 FROM chat_member cm
@@ -303,3 +311,51 @@ ORDER BY cm.chat_room_id;
 ALTER TABLE alarm
     AUTO_INCREMENT = 1;
 
+-- 10. alarm 대량 생성 - 3
+INSERT INTO alarm (my_user_id,
+                   other_user_id,
+                   chat_room_id,
+                   type)
+SELECT cr_cmb.user_id,
+       cms_cmb.user_id,
+       cms.chat_room_id,
+       'MESSAGE'
+FROM chat_message cms
+         JOIN chat_member cms_cmb
+              ON cms.chat_member_id = cms_cmb.id
+         JOIN chat_member cr_cmb
+              ON cr_cmb.chat_room_id = cms.chat_room_id
+                  AND cr_cmb.user_id <> cms_cmb.user_id
+ORDER BY cms.chat_room_id, cms.id;
+ALTER TABLE alarm
+    AUTO_INCREMENT = 1;
+
+-- 11. chat-message-alarm 대량 생성 - 1
+INSERT INTO chat_message_alarm(id, chat_message_id)
+WITH alarm_numbered AS (SELECT a.id,
+                               a.other_user_id,
+                               a.chat_room_id,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY a.other_user_id, a.chat_room_id
+                                   ORDER BY a.id
+                                   ) AS rn
+                        FROM alarm a
+                        WHERE a.type = 'MESSAGE'),
+     message_numbered AS (SELECT cms.id,
+                                 cmb.user_id,
+                                 cms.chat_room_id,
+                                 ROW_NUMBER() OVER (
+                                     PARTITION BY cmb.user_id, cms.chat_room_id
+                                     ORDER BY cms.id
+                                     ) AS rn
+                          FROM chat_message cms
+                                   JOIN chat_member cmb
+                                        ON cmb.id = cms.chat_member_id)
+SELECT a.id,
+       m.id AS message_id
+FROM alarm_numbered a
+         JOIN message_numbered m
+              ON m.user_id = a.other_user_id
+                  AND m.chat_room_id = a.chat_room_id
+                  AND m.rn = a.rn
+ORDER BY a.id
