@@ -8,6 +8,8 @@ import java.time.Instant
 interface AlarmResponseDto {
     @Schema(name = "ChatMessageAlarm")
     data class ChatMessageAlarm(
+        @get:Schema(description = "채팅 알림 일련번호", example = "1")
+        val chatMessageAlarmId: Long,
         @get:Schema(description = "채팅 일련번호", example = "1")
         val chatMessageId: Long,
         @get:Schema(description = "메세지 내용", example = "메세지 내용")
@@ -28,8 +30,8 @@ interface AlarmResponseDto {
         val alarmType: AlarmType,
         @get:Schema(description = "읽음 여부", example = "N")
         val read: YN,
-        @get:Schema(description = "알림 생성일시", example = "2026-01-01T00:00:00Z")
-        val createdAt: Instant,
+        @get:Schema(description = "알림 최신일시", example = "2026-01-01T00:00:00Z")
+        val updatedAlarmAt: Instant,
         @get:Schema(description = "메세지 알림")
         val messageAlarm: ChatMessageAlarm?
     ) : AlarmResponseDto
