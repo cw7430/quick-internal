@@ -32,7 +32,7 @@ class AlarmJooqRepository(
 
     fun createChatMessageAlarm(alarmId: Long, chatMessageId: Long) {
         dslContext.insertInto(CHAT_MESSAGE_ALARM)
-            .set(CHAT_MESSAGE_ALARM.ID, alarmId)
+            .set(CHAT_MESSAGE_ALARM.ALARM_ID, alarmId)
             .set(CHAT_MESSAGE_ALARM.CHAT_MESSAGE_ID, chatMessageId)
     }
 }
