@@ -77,7 +77,7 @@ class AlarmJooqRepository(
         val cms = CHAT_MESSAGE.`as`("cms")
 
         return dslContext.select(
-            cma.CHAT_MESSAGE_ID,
+            cma.ID,
             cma.ALARM_ID,
             cma.CHAT_MESSAGE_ID,
             cms.MESSAGE
