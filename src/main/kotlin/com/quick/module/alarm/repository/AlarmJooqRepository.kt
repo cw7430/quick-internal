@@ -18,7 +18,7 @@ import java.time.Instant
 class AlarmJooqRepository(
     private val dslContext: DSLContext
 ) {
-    fun getAlarmListByUserId(
+    fun findAlarmListByUserId(
         userId: Long,
         cursorUpdatedAlarmAt: Instant?,
         cursorAlarmId: Long?,
@@ -69,7 +69,7 @@ class AlarmJooqRepository(
             }
     }
 
-    fun getChatAlarmList(alarmIdList: List<Long>): List<AlarmVo.ChatMessageAlarm> {
+    fun findChatAlarmListByAlarmIdList(alarmIdList: List<Long>): List<AlarmVo.ChatMessageAlarm> {
         val a = ALARM.`as`("a")
         val cma = CHAT_MESSAGE_ALARM.`as`("cma")
         val cma2 = CHAT_MESSAGE_ALARM.`as`("cma2")
