@@ -8,8 +8,8 @@ interface AlarmRequestDto {
     data class GetList(
         @get:Schema(description = "일련번호", example = "1")
         val alarmId: Long?,
-        @get:Schema(description = "등록된 날짜", example = "2026-01-01T00:00:00Z")
-        val createdAt: Instant?,
+        @get:Schema(description = "알림이 수정된 날짜", example = "2026-01-01T00:00:00Z")
+        val updatedAlarmAt: Instant?,
         @get:Schema(description = "페이지 사이즈", example = "10")
         val size: Int = 10
     ) : AlarmRequestDto
