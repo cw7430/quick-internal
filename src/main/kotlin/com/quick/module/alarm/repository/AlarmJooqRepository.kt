@@ -30,6 +30,7 @@ class AlarmJooqRepository(
         return dslContext.select(
             a.ID,
             a.OTHER_USER_ID,
+            ou.NICK_NAME,
             a.CHAT_ROOM_ID,
             a.TYPE,
             a.READ,
