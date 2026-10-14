@@ -1,11 +1,11 @@
 package com.quick.module.alarm
 
 import com.quick.common.config.security.JwtUtil
-import com.quick.module.alarm.repository.AlarmJooqRepository
-import org.springframework.stereotype.Service
 import com.quick.module.alarm.dto.request.AlarmRequestDto
 import com.quick.module.alarm.dto.response.AlarmResponseDto
+import com.quick.module.alarm.repository.AlarmJooqRepository
 import com.quick.module.alarm.type.AlarmType
+import org.springframework.stereotype.Service
 
 @Service
 class AlarmService(
