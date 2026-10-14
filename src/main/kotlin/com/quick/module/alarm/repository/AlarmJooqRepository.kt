@@ -38,7 +38,7 @@ class AlarmJooqRepository(
         ).from(a)
             .join(ou).on(a.OTHER_USER_ID.eq(ou.ID))
             .where(a.MY_USER_ID.eq(userId))
-            .and(ALARM.ACTIVE_FLAG.eq(1))
+            .and(a.ACTIVE_FLAG.eq(1))
             .and(
                 if (cursorUpdatedAlarmAt != null && cursorAlarmId != null) {
                     a.UPDATED_ALARM_AT.lt(cursorUpdatedAlarmAt).or(
@@ -49,7 +49,7 @@ class AlarmJooqRepository(
                     DSL.noCondition()
                 }
             )
-            .orderBy(ALARM.UPDATED_ALARM_AT.desc(), ALARM.ID.desc())
+            .orderBy(a.UPDATED_ALARM_AT.desc(), a.ID.desc())
             .limit(size)
             .fetch { record ->
                 AlarmVo.Alarm(
