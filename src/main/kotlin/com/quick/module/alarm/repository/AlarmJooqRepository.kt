@@ -114,6 +114,17 @@ class AlarmJooqRepository(
             }
     }
 
+    fun findAlarmIdByMyUserIdAndChatRoomId(
+        myUserId: Long,
+        chatRoomId: Long
+    ): Long? =
+        dslContext.select(ALARM.ID)
+            .from(ALARM)
+            .where(ALARM.MY_USER_ID.eq(myUserId))
+            .and(ALARM.CHAT_ROOM_ID.eq(chatRoomId))
+            .and(ALARM.TYPE.eq(AlarmType.MESSAGE.value))
+            .fetchOne(ALARM.ID)
+
     fun createAlarmAndGet(myUserId: Long, otherUserId: Long, chatRoomId: Long, type: AlarmType) =
         dslContext.insertInto(ALARM)
             .set(ALARM.MY_USER_ID, myUserId)
@@ -128,5 +139,27 @@ class AlarmJooqRepository(
         dslContext.insertInto(CHAT_MESSAGE_ALARM)
             .set(CHAT_MESSAGE_ALARM.ALARM_ID, alarmId)
             .set(CHAT_MESSAGE_ALARM.CHAT_MESSAGE_ID, chatMessageId)
+            .execute()
+    }
+
+    fun updateAlarmUpdatedAlarmAtByAlarmId(alarmId: Long) {
+        dslContext.update(ALARM)
+            .set(ALARM.UPDATED_ALARM_AT, Instant.now())
+            .where(ALARM.ID.eq(alarmId))
+            .execute()
+    }
+
+    fun updateAlarmReadByAlarmIdList(alarmIdList: List<Long>) {
+        dslContext.update(ALARM)
+            .set(ALARM.READ, YN.Y.value)
+            .where(ALARM.ID.`in`(alarmIdList))
+            .execute()
+    }
+
+    fun updateAlarmInvalidateByAlarmId(alarmId: Long) {
+        dslContext.update(ALARM)
+            .set(ALARM.VALID, YN.N.value)
+            .where(ALARM.ID.eq(alarmId))
+            .execute()
     }
 }
