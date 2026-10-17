@@ -137,4 +137,18 @@ class AlarmService(
 
         log.info { "Create Alarm successfully for UserId:$myUserId, AlarmId:$alarmId" }
     }
+
+    @Transactional
+    fun updateAlarmRead(reqDto: AlarmRequestDto.Read) {
+        val myUserId = jwtUtil.getCurrentUserId()
+        alarmJooqRepository.updateAlarmReadByAlarmIdList(reqDto.alarmIdList)
+        log.info { "Update Alarm Read successfully for UserId:$myUserId" }
+    }
+
+    @Transactional
+    fun invalidateAlarm(alarmId: Long) {
+        val myUserId = jwtUtil.getCurrentUserId()
+        alarmJooqRepository.updateAlarmInvalidateByAlarmId(alarmId)
+        log.info { "Invalidate Alarm successfully for UserId:$myUserId, AlarmId:$alarmId" }
+    }
 }

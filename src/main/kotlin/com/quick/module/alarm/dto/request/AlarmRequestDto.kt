@@ -36,4 +36,10 @@ interface AlarmRequestDto {
         val isValidMessage: Boolean
             get() = alarmType != AlarmType.MESSAGE || chatMessageId != null
     }
+
+    @Schema(name = "UpdateAlarmReadRequest")
+    data class Read(
+        @get:Schema(description = "알람 일련번호", example = "[1, 2]")
+        val alarmIdList: List<Long>
+    ) : AlarmRequestDto
 }

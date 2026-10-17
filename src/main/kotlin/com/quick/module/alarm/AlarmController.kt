@@ -75,15 +75,7 @@ class AlarmController(
     @SecurityRequirement(name = "access-token")
     @ApiResponses(
         ApiResponse(
-            responseCode = "200", description = "알림 불러오기 성공", content = [
-                Content(
-                    mediaType = "application/json",
-                    schema = Schema(
-                        type = "array",
-                        implementation = AlarmResponseDto.ListData::class
-                    )
-                )
-            ]
+            responseCode = "204", description = "알림 생성 성공"
         ),
         ApiResponse(
             responseCode = "400", description = "입력값 오류", content = [
@@ -134,6 +126,92 @@ class AlarmController(
     )
     fun createAlarm(@RequestBody @Valid reqDto: AlarmRequestDto.Alarm): ResponseEntity<Void> {
         alarmService.createAlarm(reqDto)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PatchMapping("/read")
+    @Operation(summary = "알림 읽음 처리")
+    @SecurityRequirement(name = "access-token")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "알림 읽음 처리 성공"
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun updateAlarmRead(@RequestBody @Valid reqDto: AlarmRequestDto.Read): ResponseEntity<Void> {
+        alarmService.updateAlarmRead(reqDto)
+        return ResponseEntity.noContent().build()
+    }
+
+    @DeleteMapping("/{alarmId}")
+    @Operation(summary = "알림 삭제")
+    @SecurityRequirement(name = "access-token")
+    @ApiResponses(
+        ApiResponse(
+            responseCode = "204", description = "알림 삭제 성공"
+        ),
+        ApiResponse(
+            responseCode = "401", description = "인증오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(
+                        oneOf = [
+                            ErrorResponseDoc.Unauthorized::class,
+                            ErrorResponseDoc.ExpiredToken::class,
+                            ErrorResponseDoc.InvalidToken::class
+                        ]
+                    )
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "403", description = "Api Key 오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.KeyError::class)
+                )
+            ]
+        ),
+        ApiResponse(
+            responseCode = "500", description = "기타오류", content = [
+                Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponseDoc.InternalServerError::class)
+                )
+            ]
+        )
+    )
+    fun invalidateAlarm(@PathVariable alarmId: Long): ResponseEntity<Void> {
+        alarmService.invalidateAlarm(alarmId)
         return ResponseEntity.noContent().build()
     }
 }
