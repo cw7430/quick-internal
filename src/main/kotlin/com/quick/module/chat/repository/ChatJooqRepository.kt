@@ -282,6 +282,26 @@ class ChatJooqRepository(
         )
     }
 
+    fun existChatRoomByChatRoomIdAndUserId(
+        chatRoomId: Long,
+        myUserId: Long,
+        otherUserId: Long
+    ): Boolean {
+        val cr = CHAT_ROOM.`as`("cr")
+        val cmMain = CHAT_MEMBER.`as`("cm_main")
+        val cmSub = CHAT_MEMBER.`as`("cm_sub")
+
+        return dslContext.fetchExists(
+            DSL.selectOne()
+                .from(cmMain)
+                .join(cr).on(cmMain.CHAT_ROOM_ID.eq(cr.ID))
+                .join(cr).on(cmSub.CHAT_ROOM_ID.eq(cr.ID))
+                .where(cr.ID.eq(chatRoomId))
+                .and(cmMain.USER_ID.eq(myUserId))
+                .and(cmSub.USER_ID.eq(otherUserId))
+        )
+    }
+
     fun existChatMemberByChatRoomIdAndUserId(chatRoomId: Long, userId: Long) =
         dslContext.fetchExists(
             DSL.selectOne()

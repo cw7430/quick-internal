@@ -7,6 +7,7 @@ import com.quick.module.alarm.dto.request.AlarmRequestDto
 import com.quick.module.alarm.dto.response.AlarmResponseDto
 import com.quick.module.alarm.repository.AlarmJooqRepository
 import com.quick.module.alarm.type.AlarmType
+import com.quick.module.chat.repository.ChatJooqRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +17,8 @@ private val log = KotlinLogging.logger {}
 @Service
 class AlarmService(
     private val jwtUtil: JwtUtil,
-    private val alarmJooqRepository: AlarmJooqRepository
+    private val alarmJooqRepository: AlarmJooqRepository,
+    private val chatJooqRepository: ChatJooqRepository
 ) {
     fun getAlarmList(reqDto: AlarmRequestDto.GetList): List<AlarmResponseDto.ListData> {
         val myUserId = jwtUtil.getCurrentUserId()
@@ -69,6 +71,16 @@ class AlarmService(
     @Transactional
     fun createAlarm(reqDto: AlarmRequestDto.Alarm) {
         val myUserId = jwtUtil.getCurrentUserId()
+        val isChatRoomExist = chatJooqRepository.existChatRoomByChatRoomIdAndUserId(
+            chatRoomId = reqDto.chatRoomId,
+            myUserId = myUserId,
+            otherUserId = reqDto.userId
+        )
+        if (!isChatRoomExist) {
+            throw CustomException(
+                ResponseCode.RESOURCE_NOT_FOUND
+            )
+        }
 
         if (reqDto.alarmType != AlarmType.MESSAGE) {
             val alarmId = alarmJooqRepository.createAlarmAndGet(
@@ -84,6 +96,17 @@ class AlarmService(
         }
 
         val chatMessageId = requireNotNull(reqDto.chatMessageId)
+
+        val isChatMessageExist = chatJooqRepository.existChatMessageByChatMessageIdAndUserId(
+            chatMessageId,
+            userId = myUserId
+        )
+
+        if (!isChatMessageExist) {
+            throw CustomException(
+                ResponseCode.RESOURCE_NOT_FOUND
+            )
+        }
 
         val existingAlarmId =
             alarmJooqRepository.findAlarmIdByMyUserIdAndChatRoomId(
